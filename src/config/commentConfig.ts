@@ -31,21 +31,21 @@ import { withUserConfig } from "../utils/config-overlay.ts";
  */
 export const commentConfig: CommentConfig = withUserConfig("comment", {
 	/** 全局评论总开关：false 时完全不加载评论脚本与 DOM */
-	enable: true,
+	enable: false,
 	/** 评论提供商类型："none" | "twikoo" | "giscus" | "waline" */
-	provider: "waline",
+	provider: "none",
 	/** 是否开启视口懒加载：滚动进入视口才动态加载评论组件（推荐 true） */
 	lazy: true,
 	/** Waline 专有配置 */
 	waline: {
 		/** Waline 服务端地址 */
-		serverURL: "https://waline.klucen.cn/",
+		serverURL: "",
 		/** Waline 客户端 JS（UMD）地址（本地托管，避免 CDN 不可达） */
 		scriptUrl: "/assets/js/waline.umd.js",
 		/** Waline 样式表地址（本地托管） */
 		cssUrl: "/assets/css/waline.css",
 		/** 评论语言："auto"（跟随站点）| "zh-CN" 等 */
-		lang: "zh-CN",
+		lang: "auto",
 		/** 是否启用阅读量统计 */
 		pageview: false,
 	},

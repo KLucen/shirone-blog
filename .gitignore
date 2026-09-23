@@ -73,3 +73,21 @@ artifacts/lighthouse/*
 
 # generated AI skills plugin packages
 artifacts/shirone-ai-*
+
+# content repository (materialized by `pnpm content:sync`)
+/src/content/
+/src/data/*.ts
+/src/user/user-config.ts
+/src/config/FooterConfig.html
+/src/assets/images/
+/public/images/
+/public/assets/banner/
+/public/assets/music/
+/public/assets/projects/
+/public/assets/anime/*.webp
+
+# `public/images/` 整体由内容仓接管，但 albums 目录下的数据契约文档属于主题资产：
+# 它们描述 `info.json` 的字段约定，是给主题使用者看的，必须留在代码仓并随上游更新。
+!public/images/albums/
+!public/images/albums/AGENTS.md
+!public/images/albums/README.md
