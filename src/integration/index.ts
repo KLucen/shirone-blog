@@ -3,6 +3,7 @@ import { createRequire } from "node:module";
 import { dirname, join } from "node:path";
 import { pathToFileURL } from "node:url";
 import type { AstroIntegration } from "astro";
+import type { ResolvedUmamiOptions } from "../config/umamiConfig.ts";
 import {
 	expressiveCodeShared,
 	IMAGE_ENDPOINT_ROUTE,
@@ -259,10 +260,10 @@ export function shirones(options: ShironesOptions = {}): AstroIntegration {
 					"umamiConfig",
 					registryRef,
 				);
-				const umamiConfig = umamiModule.umamiConfig as { shareUrl: string };
+				const umamiConfig = umamiModule.umamiConfig;
 				const resolveUmamiOptions = umamiModule.resolveUmamiOptions as (
 					c: unknown,
-				) => unknown;
+				) => ResolvedUmamiOptions;
 
 				const musicWidgetEnabled = Boolean(
 					sidebarConfig?.enable &&
@@ -273,7 +274,6 @@ export function shirones(options: ShironesOptions = {}): AstroIntegration {
 				const musicEnabled =
 					musicWidgetEnabled && resolveMusicOptions(musicConfig) !== null;
 				const umamiEnabled = resolveUmamiOptions(umamiConfig) !== null;
-
 				// ── 2. Watch config files so the dev server restarts on edits ───
 				if (command === "dev" && existsSync(paths.configDir)) {
 					addWatchFile(pathToFileURL(paths.configDir));
@@ -311,7 +311,7 @@ export function shirones(options: ShironesOptions = {}): AstroIntegration {
 								paths,
 								command,
 								{
-									umamiConfig,
+									umamiOptions: resolveUmamiOptions(umamiConfig),
 									umamiEnabled,
 								},
 								registryRef,
@@ -496,7 +496,7 @@ type ConfigCommand = Parameters<
 async function createBundledIntegrations(
 	paths: ResolvedShironesPaths,
 	command: ConfigCommand,
-	options: { umamiConfig: { shareUrl: string }; umamiEnabled: boolean },
+	options: { umamiOptions: ResolvedUmamiOptions; umamiEnabled: boolean },
 	registryRef?: { overrides: Map<string, string> },
 ) {
 	const [
@@ -518,11 +518,14 @@ async function createBundledIntegrations(
 		import("@expressive-code/plugin-collapsible-sections"),
 		import("@expressive-code/plugin-line-numbers"),
 	]);
-	const oddmiscIntegration = options.umamiEnabled
+	/*
+	 * 只在**读取层**配好时注入 oddmisc 运行时。采集层的存在与否与它无关：
+	 * 没有 `shareUrl` 就没有可读的分享端点，注入运行时只会白白多一份脚本。
+	 */
+	const shareUrl = options.umamiOptions?.shareUrl;
+	const oddmiscIntegration = options.umamiEnabled && shareUrl
 		? (await import("oddmisc/astro")).oddmisc({
-				umami: {
-					shareUrl: options.umamiConfig.shareUrl,
-				},
+				umami: { shareUrl },
 			})
 		: null;
 

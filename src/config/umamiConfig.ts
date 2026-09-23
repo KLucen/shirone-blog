@@ -21,20 +21,42 @@ export const umamiConfig: UmamiConfig = withUserConfig("umami", {
 });
 
 /**
- * 解析并校验 Umami 配置。未启用或关键参数缺失时返回 null。
+ * 解析并校验 Umami 配置。全局关闭、或两层都没配齐时返回 null。
+ *
+ * ## 为什么不能因为 `shareUrl` 缺失就返回 null
+ *
+ * 早先这里在 `shareUrl` 为空时直接返回 null，于是「只采集、不读取」这个组合
+ * 静默失效：`Layout.astro` 的采集脚本挂在 `umamiOptions?.websiteId` 之下，
+ * 而 `umamiOptions` 恒为 null，脚本永远不注入——配了 Tracking code 却没有任何
+ * 数据上报，且没有任何报错。这既与文档描述的「两层独立」矛盾，也是采集层
+ * 事实上无法启用的根因。
+ *
+ * 现在两层各自判断：
+ *   - 读取层：`shareUrl` 非空
+ *   - 采集层：`websiteId` 与 `scriptUrl` **同时**非空
+ *
+ * 任何一层配齐就返回配置对象；两层都空才返回 null（此时真的无事可做）。
  */
 export function resolveUmamiOptions(config: UmamiConfig): ResolvedUmamiOptions {
 	if (!config.enable) {
 		return null;
 	}
-	const shareUrl = config.shareUrl?.trim();
-	if (!shareUrl) {
+
+	const shareUrl = config.shareUrl?.trim() || undefined;
+	const websiteId = config.websiteId?.trim() || undefined;
+	const scriptUrl = config.scriptUrl?.trim() || undefined;
+
+	// 采集层要求成对出现：只有 id 没有脚本地址（或反之）都无法上报
+	const collect = Boolean(websiteId && scriptUrl);
+
+	// 两层都没配齐：保持「零加载」承诺——不注入运行时，也不渲染任何占位
+	if (!shareUrl && !collect) {
 		return null;
 	}
+
 	return {
-		shareUrl,
-		websiteId: config.websiteId?.trim() || undefined,
-		scriptUrl: config.scriptUrl?.trim() || undefined,
+		...(shareUrl ? { shareUrl } : {}),
+		...(collect ? { websiteId, scriptUrl } : {}),
 	};
 }
 

@@ -173,7 +173,12 @@ const postCommentEnabled =
 	entry.data.comment !== false && Boolean(resolveCommentOptions(commentConfig));
 const lastUpdatedNotice = resolveLastUpdatedNoticeOptions(articleConfig);
 const shareOptions = resolveArticleShareOptions(articleConfig);
-const umamiEnabled = resolveUmamiOptions(umamiConfig) !== null;
+/*
+ * 页脚的文章阅读量来自 oddmisc 的**读取层**，因此判据是 `shareUrl` 而不是
+ * 「配置是否存在」——只配了采集脚本时这里必须保持不渲染，否则会出现一个
+ * 没有数据源、永远显示不出来的统计组件。
+ */
+const umamiReadEnabled = Boolean(resolveUmamiOptions(umamiConfig)?.shareUrl);
 const authorAvatarUrl = shareOptions
 	? await resolveAsset(profileConfig.avatar ?? "")
 	: "";
@@ -232,7 +237,7 @@ const jsonLd = {
 					</div>
 					<div class="text-sm">{remarkPluginFrontmatter.minutes} {" " + i18n(remarkPluginFrontmatter.minutes === 1 ? I18nKey.minuteCount : I18nKey.minutesCount)}</div>
 				</div>
-				{umamiEnabled && (
+				{umamiReadEnabled && (
 					<div class="flex flex-row items-center">
 						<UmamiStats variant="meta" path={canonicalPostUrl} />
 					</div>

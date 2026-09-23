@@ -14,9 +14,18 @@ export type UmamiConfig = {
 
 /**
  * 解析后的 Umami 配置选项。
+ *
+ * `shareUrl` 是**可选**的：它是「读取层」的入口，与「采集层」（`websiteId` +
+ * `scriptUrl`）彼此独立。只配置采集层时不该被判定为「未启用」。
+ *
+ * 读取方的约定：
+ * - 注入 oddmisc 读取运行时前先看 `shareUrl`（缺省时不注入，不发任何请求）；
+ * - 注入采集脚本前先看 `websiteId` 与 `scriptUrl`。
+ *
+ * 返回 `null` 仅表示「一层都没配」或全局关闭。
  */
 export type ResolvedUmamiOptions = {
-	shareUrl: string;
+	shareUrl?: string;
 	websiteId?: string;
 	scriptUrl?: string;
 } | null;

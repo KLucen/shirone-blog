@@ -150,6 +150,13 @@ const hasMonoFont =
 		{hasBodyFont && <Font cssVariable={resolvedFontOptions.roles.body.cssVariable as never} preload={resolvedFontOptions.roles.body.preload} />}
 		{hasCjkFont && <Font cssVariable={resolvedFontOptions.roles.cjk.cssVariable as never} preload={resolvedFontOptions.roles.cjk.preload} />}
 		{hasMonoFont && <Font cssVariable={resolvedFontOptions.roles.mono.cssVariable as never} preload={resolvedFontOptions.roles.mono.preload} />}
+		{/*
+			采集层：注入 Umami 官方脚本记录访客行为。
+			与读取层（shareUrl）无关——只配 Tracking code 时这里就该生效。
+
+			读取层：注入 oddmisc 运行时。没有 shareUrl 就没有可读的分享端点，
+			挂载它只会平白多一份脚本与一个必然失败的组件。
+		*/}
 		{umamiOptions?.websiteId && umamiOptions.scriptUrl && (
 			<script is:inline async src={umamiOptions.scriptUrl} data-website-id={umamiOptions.websiteId} data-auto-track="true"></script>
 		)}
@@ -230,7 +237,7 @@ const hasMonoFont =
 		data-banner-has-mobile={String(hasMobileBanner)}
 	>
 		<ConfigCarrier></ConfigCarrier>
-		{umamiOptions && <UmamiRuntime />}
+		{umamiOptions?.shareUrl && <UmamiRuntime />}
 		{textureEnabled && (
 			<div
 				id="m3e-texture-canvas"
