@@ -2,6 +2,7 @@ import type {
 	CommentConfig,
 	GiscusConfig,
 	TwikooConfig,
+	WalineConfig,
 } from "@/types/commentConfig";
 import { withUserConfig } from "../utils/config-overlay.ts";
 
@@ -30,11 +31,24 @@ import { withUserConfig } from "../utils/config-overlay.ts";
  */
 export const commentConfig: CommentConfig = withUserConfig("comment", {
 	/** 全局评论总开关：false 时完全不加载评论脚本与 DOM */
-	enable: false,
-	/** 评论提供商类型："none" | "twikoo" | "giscus" */
-	provider: "none",
+	enable: true,
+	/** 评论提供商类型："none" | "twikoo" | "giscus" | "waline" */
+	provider: "waline",
 	/** 是否开启视口懒加载：滚动进入视口才动态加载评论组件（推荐 true） */
 	lazy: true,
+	/** Waline 专有配置 */
+	waline: {
+		/** Waline 服务端地址 */
+		serverURL: "https://waline.klucen.cn/",
+		/** Waline 客户端 JS（UMD）地址（本地托管，避免 CDN 不可达） */
+		scriptUrl: "/assets/js/waline.umd.js",
+		/** Waline 样式表地址（本地托管） */
+		cssUrl: "/assets/css/waline.css",
+		/** 评论语言："auto"（跟随站点）| "zh-CN" 等 */
+		lang: "zh-CN",
+		/** 是否启用阅读量统计 */
+		pageview: false,
+	},
 	/** Twikoo 专有配置 */
 	twikoo: {
 		/** Twikoo 环境 ID（如 "https://your-twikoo.vercel.app" 或腾讯云环境 ID） */
@@ -86,6 +100,11 @@ export type ResolvedCommentOptions =
 			lazy: boolean;
 			giscus: GiscusConfig;
 	  }
+	| {
+			provider: "waline";
+			lazy: boolean;
+			waline: WalineConfig;
+	  }
 	| null;
 
 /**
@@ -135,6 +154,22 @@ export function resolveCommentOptions(
 					dark: config.giscus.theme?.dark?.trim() || "dark",
 				},
 				scriptUrl: config.giscus.scriptUrl?.trim(),
+			},
+		};
+	}
+	if (config.provider === "waline") {
+		const serverURL = config.waline.serverURL?.trim();
+		const scriptUrl = config.waline.scriptUrl?.trim();
+		if (!serverURL || !scriptUrl) {
+			return null;
+		}
+		return {
+			provider: "waline",
+			lazy: config.lazy,
+			waline: {
+				...config.waline,
+				serverURL,
+				scriptUrl,
 			},
 		};
 	}

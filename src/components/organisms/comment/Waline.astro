@@ -1,0 +1,190 @@
+---
+import LoadingIndicator from "@components/atoms/feedback/LoadingIndicator.svelte";
+import I18nKey from "@i18n/i18nKey";
+import { i18n } from "@i18n/translation";
+import type { CommentContext, WalineConfig } from "@/types/commentConfig";
+
+interface Props {
+	context: CommentContext;
+	config: WalineConfig;
+	lazy?: boolean;
+}
+
+const { context, config, lazy = true } = Astro.props;
+const resolvedLang = config.lang === "auto" ? context.language : config.lang;
+
+// Waline 的 path 必须与 Hexo 旧站一致：/posts/xxx.html（无尾部斜杠）
+// context.path 是 canonical 路径（如 /posts/640296d4.html/），这里去掉尾部斜杠
+const normalizedPath = context.path.endsWith("/") && context.path.length > 1
+	? context.path.slice(0, -1)
+	: context.path;
+---
+
+<div
+	class="shirone-waline-wrapper"
+	data-waline-server-url={config.serverURL}
+	data-waline-script-url={config.scriptUrl}
+	data-waline-css-url={config.cssUrl}
+	data-waline-path={normalizedPath}
+	data-waline-lang={resolvedLang}
+	data-waline-pageview={String(config.pageview ?? false)}
+	data-waline-emoji={JSON.stringify(config.emoji ?? [])}
+	data-waline-lazy={String(lazy)}
+>
+	<!-- 加载骨架 -->
+	<div class="waline-skeleton flex items-center justify-center min-h-[10rem]">
+		<LoadingIndicator />
+	</div>
+
+	<!-- 评论容器 -->
+	<div id="waline" class="waline-container hidden"></div>
+
+	<!-- 错误提示容器 -->
+	<div class="waline-error hidden p-4 rounded-[var(--shape-corner-m)] bg-[var(--error-container)] text-[var(--on-error-container)] text-sm text-center">
+		{i18n(I18nKey.commentsLoadFailed)}
+	</div>
+
+	<!-- 无 JavaScript 降级提示 -->
+	<noscript>
+		<div class="p-4 rounded-[var(--shape-corner-m)] bg-[var(--surface-container-high)] text-[var(--on-surface-variant)] text-sm text-center">
+			{i18n(I18nKey.commentsRequiresJavaScript)}
+		</div>
+	</noscript>
+</div>
+
+<script>
+	import { loadScriptOnce } from "@utils/script-loader";
+
+	interface WalineInstance {
+		destroy: () => void;
+		update: (options: Record<string, unknown>) => void;
+	}
+
+	interface WalineSdk {
+		init: (options: {
+			el: HTMLElement | string;
+			serverURL: string;
+			path?: string;
+			lang?: string;
+			dark?: string;
+			pageview?: boolean;
+			emoji?: string[];
+		}) => WalineInstance;
+	}
+
+	declare global {
+		interface Window {
+			Waline?: WalineSdk;
+		}
+	}
+
+	function loadCssOnce(href: string): Promise<void> {
+		const existing = document.querySelector<HTMLLinkElement>(
+			`link[href="${href}"]`,
+		);
+		if (existing) return Promise.resolve();
+		return new Promise((resolve, reject) => {
+			const link = document.createElement("link");
+			link.rel = "stylesheet";
+			link.href = href;
+			link.onload = () => resolve();
+			link.onerror = () => reject(new Error(`Failed to load CSS: ${href}`));
+			document.head.appendChild(link);
+		});
+	}
+
+	function initWalineInstance(wrapper: HTMLElement) {
+		if (wrapper.dataset.walineMounted === "true") return;
+
+		const serverURL = wrapper.dataset.walineServerUrl;
+		const scriptUrl = wrapper.dataset.walineScriptUrl;
+		const cssUrl = wrapper.dataset.walineCssUrl;
+		const path = wrapper.dataset.walinePath;
+		const lang = wrapper.dataset.walineLang;
+		const pageview = wrapper.dataset.walinePageview === "true";
+		const emojiRaw = wrapper.dataset.walineEmoji;
+		const isLazy = wrapper.dataset.walineLazy === "true";
+
+		const skeleton = wrapper.querySelector<HTMLElement>(".waline-skeleton");
+		const container = wrapper.querySelector<HTMLElement>(".waline-container");
+		const errorBox = wrapper.querySelector<HTMLElement>(".waline-error");
+
+		if (!serverURL || !scriptUrl || !container) return;
+
+		const doInit = async () => {
+			try {
+				if (cssUrl) {
+					await loadCssOnce(cssUrl).catch(() => {});
+				}
+				await loadScriptOnce(scriptUrl);
+				if (typeof window.Waline?.init !== "function") {
+					throw new Error("Waline SDK not found on window");
+				}
+
+				wrapper.dataset.walineMounted = "true";
+				container.classList.remove("hidden");
+				skeleton?.classList.add("hidden");
+
+				let emoji: string[] = [];
+				try {
+					emoji = emojiRaw ? JSON.parse(emojiRaw) : [];
+				} catch {}
+
+				window.Waline.init({
+					el: container,
+					serverURL,
+					path: path || window.location.pathname,
+					lang: lang || "zh-CN",
+					dark: "html.dark", // Shirone 的暗黑模式标记
+					pageview,
+					...(emoji.length > 0 ? { emoji } : {}),
+				});
+			} catch (err) {
+				console.error("[Shirone Comments] Waline initialization failed:", err);
+				skeleton?.classList.add("hidden");
+				errorBox?.classList.remove("hidden");
+			}
+		};
+
+		if (isLazy && "IntersectionObserver" in window) {
+			const observer = new IntersectionObserver(
+				(entries, obs) => {
+					if (entries[0].isIntersecting) {
+						obs.disconnect();
+						doInit();
+					}
+				},
+				{ rootMargin: "200px" },
+			);
+			observer.observe(wrapper);
+		} else {
+			doInit();
+		}
+	}
+
+	function setupAllWaline() {
+		const wrappers = document.querySelectorAll<HTMLElement>(
+			".shirone-waline-wrapper",
+		);
+		wrappers.forEach(initWalineInstance);
+	}
+
+	// 首次页面直达加载
+	setupAllWaline();
+
+	// 响应 Swup 页面替换生命周期
+	document.addEventListener("swup:content:replace", setupAllWaline);
+	document.addEventListener("swup:page:view", setupAllWaline);
+</script>
+
+<style>
+	/* Waline 主题色适配 Shirone M3E 令牌 */
+	.shirone-waline-wrapper #waline {
+		--waline-theme-color: var(--primary);
+		--waline-active-color: var(--primary);
+		--waline-color: var(--on-surface);
+		--waline-bg-color: var(--card-bg);
+		--waline-bg-color-light: var(--surface-container-low);
+		--waline-border-color: var(--outline-variant);
+	}
+</style>

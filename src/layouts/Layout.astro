@@ -241,6 +241,26 @@ const hasMonoFont =
 		<Snackbar client:only="svelte"></Snackbar>
 		<slot />
 		<div id="page-height-extend" class="hidden h-[300vh]"></div>
+		<!-- Live2D 看板娘（koharu，从 Hexo 站迁移） -->
+		<script is:inline src="/live2dw/lib/L2Dwidget.min.js"></script>
+		<script is:inline>
+		(function initLive2D() {
+			if (window.__live2dInited) return;
+			if (typeof L2Dwidget === "undefined") return;
+			window.__live2dInited = true;
+			L2Dwidget.init({
+				pluginRootPath: "live2dw/",
+				pluginJsPath: "lib/",
+				pluginModelPath: "assets/",
+				tagMode: false,
+				debug: false,
+				model: { jsonPath: "/live2dw/assets/koharu.model.json" },
+				display: { position: "right", width: 150, height: 300, hOffset: 20, vOffset: -15 },
+				mobile: { show: true },
+				log: false,
+			});
+		})();
+		</script>
 	</body>
 </html>
 
