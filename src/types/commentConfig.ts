@@ -1,4 +1,4 @@
-export type CommentProvider = "none" | "twikoo" | "giscus" | "waline";
+export type CommentProvider = "none" | "twikoo" | "giscus";
 
 export interface TwikooConfig {
 	/** Twikoo 环境 ID 或后端服务地址 URL */
@@ -9,21 +9,6 @@ export interface TwikooConfig {
 	lang: "auto" | string;
 	/** 评论输入框的灰色说明文字；留空时不显示 */
 	placeholder?: string;
-}
-
-export interface WalineConfig {
-	/** Waline 服务端地址（如 "https://waline.klucen.cn/"） */
-	serverURL: string;
-	/** Waline 客户端 JS（UMD）地址，默认本地 /assets/js/waline.umd.js */
-	scriptUrl: string;
-	/** Waline 样式表地址，默认本地 /assets/css/waline.css */
-	cssUrl: string;
-	/** 评论语言，"auto" 自动跟随站点语言，也可指定如 "zh-CN" */
-	lang: "auto" | string;
-	/** 是否启用阅读量统计 */
-	pageview?: boolean;
-	/** 表情包地址列表（可选） */
-	emoji?: string[];
 }
 
 export interface CommentConfig {
@@ -37,8 +22,6 @@ export interface CommentConfig {
 	twikoo: TwikooConfig;
 	/** Giscus 专属配置 */
 	giscus: GiscusConfig;
-	/** Waline 专属配置 */
-	waline: WalineConfig;
 }
 
 export interface GiscusConfig {
