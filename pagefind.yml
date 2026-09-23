@@ -1,3 +1,19 @@
+# 收紧 Pagefind 的收录 glob，避开「以 .html 结尾的目录」。
+#
+# 背景：文章 frontmatter 的 `permalink: posts/<abbrlink>.html` 让 Astro 生成两种形态——
+#   dist/posts/学习分享/73edb7ce/index.html   （分类嵌套路径）
+#   dist/posts/73edb7ce.html/index.html       （扁平旧 URL 副本，供 /posts/xxx.html 兼容）
+# Pagefind 默认 glob `**/*.{html}` 会用字符串匹配把 `posts/73edb7ce.html` 判定为 HTML 文件，
+# 去读时才发现它其实是目录，于是每个旧 URL 报一条错：
+#   Linux  -> Is a directory (os error 21)
+#   Windows-> 拒绝访问 (os error 5)
+# 8 篇文章共 8 条报错，并让 pagefind 以非零退出，进而使 `&&` 串联的 build 整体失败。
+#
+# 注意 `**/*.html`（仍以 .html 结尾）同样无效——匹配的是路径字符串，目录名照样命中。
+# 必须换成 `**/index.html`：目录名不以 index.html 结尾，物理上无法被匹配到。
+# 两种形态内容完全相同，跳过目录不损失搜索覆盖，且索引量实测不变（18 页 / 5085 词）。
+glob: "**/index.html"
+
 exclude_selectors:
   - "span.katex"
   - "span.katex-display"
