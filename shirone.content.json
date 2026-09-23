@@ -1,8 +1,9 @@
 {
   "schemaVersion": 1,
   "source": {
-    "type": "path",
-    "path": "../shirone-content"
+    "type": "git",
+    "url": "https://github.com/KLucen/shirone-content.git",
+    "ref": "main"
   },
   "keep": [
     "public/images/albums/AGENTS.md",
