@@ -136,6 +136,21 @@ async function mockGiscus(page: Page) {
 	});
 }
 
+/**
+ * 评论 UI 测试需要一篇真实存在、且开放评论的文章。
+ * 不写死某个 slug：站点内容由内容仓提供（文章 URL 还受 permalink 配置影响），
+ * 从首页取第一篇真实文章链接，demo 内容与个人内容两种模式下都成立。
+ */
+async function openFirstPost(page: Page): Promise<void> {
+	await page.goto("/");
+	const href = await page
+		.locator('a[href^="/posts/"]')
+		.first()
+		.getAttribute("href");
+	if (!href) throw new Error("首页没有文章链接，评论 UI 测试无法定位文章");
+	await page.goto(href);
+}
+
 test.describe("Comment System - Configuration & Architecture", () => {
 	test.use({ viewport: { width: 1280, height: 900 } });
 
@@ -642,7 +657,7 @@ test.describe("Comment System - Configuration & Architecture", () => {
 			"评论未启用或 provider 非 giscus，跳过 giscus UI 测试",
 		);
 		await mockGiscus(page);
-		await page.goto("/posts/guide/");
+		await openFirstPost(page);
 		await page.locator("#comments").scrollIntoViewIfNeeded();
 
 		// 骨架屏先渲染，iframe 挂载后 :has() 隐藏骨架屏
@@ -692,7 +707,7 @@ test.describe("Comment System - Configuration & Architecture", () => {
 		// 站点亮色 + 浏览器偏好暗色：外壳若只声明 light，Chromium 会给 iframe
 		// 强制铺上不透明深色画布，评论区出现黑底（Shirone#80）。
 		await page.emulateMedia({ colorScheme: "dark" });
-		await page.goto("/posts/guide/");
+		await openFirstPost(page);
 		await page.locator("#comments").scrollIntoViewIfNeeded();
 
 		const iframe = page.locator(".shirone-giscus-wrapper iframe.giscus-frame");
@@ -712,7 +727,7 @@ test.describe("Comment System - Configuration & Architecture", () => {
 			"评论未启用或 provider 非 giscus，跳过 giscus UI 测试",
 		);
 		await mockGiscus(page);
-		await page.goto("/posts/guide/");
+		await openFirstPost(page);
 		await page.locator("#comments").scrollIntoViewIfNeeded();
 
 		const wrapper = page.locator(".shirone-giscus-wrapper");
@@ -765,7 +780,7 @@ test.describe("Comment System - Configuration & Architecture", () => {
 			"评论未启用或 provider 非 giscus，跳过 giscus UI 测试",
 		);
 		await mockGiscus(page);
-		await page.goto("/posts/guide/");
+		await openFirstPost(page);
 		await page.locator("#comments").scrollIntoViewIfNeeded();
 		await expect(
 			page.locator(".shirone-giscus-wrapper iframe.giscus-frame"),
