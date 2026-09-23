@@ -6,9 +6,9 @@ import { withUserConfig } from "../utils/config-overlay.ts";
  * 类型见 src/types/config.ts。
  */
 export const profileConfig: ProfileConfig = withUserConfig("profile", {
-	avatar: "assets/images/demo-avatar.webp", // Relative to the /src directory. Relative to the /public directory if it starts with '/'
-	name: "Shirone",
-	bio: "The rain remembers what the sky forgot to say.",
+	avatar: "https://pics.klucen.cn//bangumi/Asuka.jpg", // Relative to the /src directory. Relative to the /public directory if it starts with '/'
+	name: "KLucen",
+	bio: "Lass den Wind mich in die Ferne treiben.",
 	links: [
 		{
 			name: "X",
@@ -25,7 +25,7 @@ export const profileConfig: ProfileConfig = withUserConfig("profile", {
 		{
 			name: "GitHub",
 			icon: "fa6-brands:github",
-			url: "https://github.com/LyraVoid/Shirone",
+			url: "https://github.com/KLucen",
 		},
 	],
 });
