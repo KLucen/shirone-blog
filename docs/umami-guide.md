@@ -48,6 +48,21 @@ shareUrl: https://your-umami-instance.com/share/<shareId>
 - `https://cloud.umami.is/analytics/us/share/<shareId>`
 - `https://umami.example.com/analytics/share/<shareId>`
 
+> **Umami Cloud：直接粘贴控制台给出的链接即可。**
+>
+> 控制台生成的分享链接是 `https://cloud.umami.is/share/<shareId>`——
+> **不含** `/analytics/us` 前缀。而云版的 API 却在 `/analytics/us/api` 下：
+> 分享页与 API 的路径在 Cloud 上**并不对应**，因此不能用「把 `/share/` 之后
+> 替换成 `/api`」这条通用规则去推导。
+>
+> 自托管实例两者同前缀，那条规则成立；Cloud 是例外。
+> `oddmisc` 运行时只按推导规则构造请求，所以**页面上（文章页的阅读量）
+> 用裸链接会读不到数据**；管理端 `ShironeAdmin/server/umami.ts` 额外带了
+> Cloud 前缀回退，同一个链接在那里可用。
+>
+> 如果你要让**页面**也显示统计，请填带前缀的形式：
+> `https://cloud.umami.is/analytics/us/share/<shareId>`。
+
 ### 3. 可选访问采集
 
 `shareUrl` 只负责读取公开分享统计。需要让 Shirone 页面本身向 Umami 上报访问时，
