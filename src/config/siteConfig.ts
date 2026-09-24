@@ -27,11 +27,11 @@ export const siteConfig: SiteConfig = withUserConfig("site", {
 		reduceMotion: true, // 是否展示减少动效切换
 		texture: true, // 是否展示背景纹理选择
 	},
-	lang: "en", // Language code, e.g. 'en', 'zh_CN', 'ja', etc.
+	lang: "zh_CN", // Language code, e.g. 'en', 'zh_CN', 'ja', etc.
 	// IANA time zone for precise post and moment timestamps. It is independent of lang.
 	timeZone: "Asia/Shanghai",
 	themeColor: {
-		hue: 315, // Default hue 0-360. 站点设计默认粉紫（偏二次元）；262 紫 / 345 粉 也可选
+		hue: 345, // Default hue 0-360. 站点设计默认粉紫（偏二次元）；262 紫 / 345 粉 也可选
 		fixed: false, // Hide the theme color picker for visitors
 		// Dynamic Material 3 palette style (TonalSpot/Vibrant/Content/Expressive/Rainbow/FruitSalad/Monochrome/Neutral/Fidelity)
 		style: "tonalSpot",
@@ -57,8 +57,20 @@ export const siteConfig: SiteConfig = withUserConfig("site", {
 		// desktop 用于 >= 1024px；mobile 仅用于 < 1024px 的首页，手机非首页不显示壁纸。
 		// 数组顺序就是轮播顺序；只需要静态 Banner 时，每组保留一张图片即可。
 		src: {
-			desktop: ["assets/images/banner/desktop/1.webp"],
-			mobile: ["assets/images/banner/mobile/1.webp"],
+			desktop: [
+				"https://pics.klucen.cn//wallpaper/20250419033923174500516318725.jpg",
+				"https://pics.klucen.cn//wallpaper/OIP-C.jpg",
+				"https://pics.klucen.cn//wallpaper/bizhihui_com_202504061743931435838716.jpg",
+				"https://pic-bed-1sw.pages.dev//wallpaper/wallpaper.jpg",
+				"https://pics.klucen.cn//desktopcover/3840x2160.jpg",
+			],
+			mobile: [
+				"https://pics.klucen.cn//bangumi/0d8e26c3d921b559fe.jpg",
+				"https://pics.klucen.cn//bangumi/73dac64f1996c68706.jpg",
+				"https://pics.klucen.cn//desktopcover/fulilian.jpg",
+				"https://pics.klucen.cn//mobliecover/978x2160.jpg",
+				"https://pics.klucen.cn//desktopcover/fengche.jpg",
+			],
 		},
 		// 图片裁切焦点："top"、"center" 或 "bottom"。
 		position: "center",
@@ -121,7 +133,7 @@ export const siteConfig: SiteConfig = withUserConfig("site", {
 	},
 	favicon: [
 		// 浏览器标签页图标，路径相对于 public 目录。
-		{ src: "/logo/icon.webp" },
+		{ src: "https://pics.klucen.cn//cover/klucen_cover.png" },
 	],
 });
 
