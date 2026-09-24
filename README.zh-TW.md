@@ -154,6 +154,8 @@ draft: false
 
 常用的選填欄位包括 `updated`、`pinned`、`comment`、`lang`、`encrypted`、`password`、`passwordHint` 與 `hideHomeContent`。圖片可使用遠端 URL、從 `public/` 開始的絕對路徑，或相對於文章檔案的路徑。
 
+轉載他人內容時可用 `license` 單獨覆寫該篇的版權卡：`license: false` 直接不顯示；傳物件則改為署名原作者與來源——`license: { author: "原作者", name: "版權歸原作者所有", url: "https://example.com/source" }`，未填寫的欄位回退站點 `licenseConfig`。
+
 ## 常用命令
 
 | 命令 | 用途 |

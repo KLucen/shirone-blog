@@ -169,6 +169,8 @@ draft: false
 
 Frequently used optional fields include `updated`, `pinned`, `comment`, `lang`, `encrypted`, `password`, `passwordHint`, and `hideHomeContent`. Images may be remote URLs, absolute paths from `public/`, or paths relative to the post file.
 
+For reprints, `license` overrides the site-wide license card on that post only: `license: false` hides the card, and an object credits someone else's work — `license: { author: "Original Author", name: "All rights reserved by the original author", url: "https://example.com/source" }`. Omitted keys fall back to the site `licenseConfig`.
+
 ## Commands
 
 | Command | Action |

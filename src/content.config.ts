@@ -27,6 +27,21 @@ const postsCollection = defineCollection({
 		seriesOrder: z.number().int().optional(),
 		lang: z.string().optional().default(""),
 
+		/**
+		 * 单篇许可覆盖（转载内容用）。`false` = 本篇不渲染版权卡；
+		 * 对象则覆盖作者/许可/链接，未填字段回退站点 licenseConfig。
+		 */
+		license: z
+			.union([
+				z.literal(false),
+				z.object({
+					author: z.string().optional().default(""),
+					name: z.string().optional().default(""),
+					url: z.string().optional().default(""),
+				}),
+			])
+			.optional(),
+
 		/* Post Encryption */
 		encrypted: z.boolean().optional().default(false),
 		password: z

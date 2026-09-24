@@ -1,6 +1,7 @@
 ---
 import I18nKey from "@i18n/i18nKey";
 import { i18n } from "@i18n/translation";
+import type { LicenseOverride } from "@/types/config";
 import { formatDateToYYYYMMDD } from "@utils/date-utils";
 import { Icon } from "astro-icon/components";
 import { licenseConfig, profileConfig } from "@/config";
@@ -9,13 +10,24 @@ interface Props {
 	title: string;
 	slug: string;
 	pubDate: Date;
+	/** 单篇许可覆盖（frontmatter `license`）；缺省字段回退站点 licenseConfig */
+	license?: LicenseOverride;
 	class?: string;
 }
 
-const { title, pubDate } = Astro.props;
+const { title, pubDate, license } = Astro.props;
 const className = Astro.props.class ?? "";
 const profileConf = profileConfig;
-const licenseConf = licenseConfig;
+// 转载内容的署名与许可来自 frontmatter：空值一律回退站点默认，避免渲染出空字段
+const licenseConf = {
+	name: license?.name || licenseConfig.name,
+	url: license?.url || licenseConfig.url,
+};
+const authorName = license?.author || profileConf.name;
+// CC 水印只对站点默认许可成立；单篇覆盖（转载）改用版权符号，避免暗示他人作品采用本站许可
+const watermarkIcon = license
+	? "fa6-regular:copyright"
+	: "fa6-brands:creative-commons";
 // `Astro.url` in a static build does not inherit an integration-set `site`
 // (see Layout.astro); derive the absolute URL from `Astro.site` instead so
 // the shown post link is the real deployed URL, not localhost.
@@ -26,7 +38,10 @@ const postUrl = decodeURIComponent(
 	).toString(),
 );
 ---
-<div class:list={["m3-license-card", className]}>
+<div
+	class:list={["m3-license-card", className]}
+	data-license-override={license ? "true" : undefined}
+>
 	<div class="m3-license-card__title">
 		{title}
 	</div>
@@ -36,7 +51,7 @@ const postUrl = decodeURIComponent(
 	<div class="m3-license-card__meta">
 		<div class="m3-license-card__meta-item">
 			<div class="m3-license-card__meta-label">{i18n(I18nKey.author)}</div>
-			<div class="m3-license-card__meta-value">{profileConf.name}</div>
+			<div class="m3-license-card__meta-value">{authorName}</div>
 		</div>
 		<div class="m3-license-card__meta-item">
 			<div class="m3-license-card__meta-label">{i18n(I18nKey.publishedAt)}</div>
@@ -47,7 +62,7 @@ const postUrl = decodeURIComponent(
 			<a href={licenseConf.url} target="_blank" rel="noopener noreferrer" class="m3-license-card__meta-link">{licenseConf.name}</a>
 		</div>
 	</div>
-	<Icon name="fa6-brands:creative-commons" class="m3-license-card__watermark" aria-hidden="true" />
+	<Icon name={watermarkIcon} class="m3-license-card__watermark" aria-hidden="true" />
 </div>
 
 <style lang="stylus">

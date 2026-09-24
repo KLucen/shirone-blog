@@ -154,6 +154,8 @@ draft: false
 
 よく使う任意フィールドには `updated`、`pinned`、`comment`、`lang`、`encrypted`、`password`、`passwordHint`、`hideHomeContent` があります。画像にはリモート URL、`public/` を基準とした絶対パス、記事ファイルからの相対パスを指定できます。
 
+転載記事では `license` でその記事だけ版権表示を上書きできます。`license: false` はカードを非表示にし、オブジェクトを渡すと原作者と出典を表示します——`license: { author: "原作者", name: "著作権は原作者に帰属します", url: "https://example.com/source" }`。省略したキーはサイトの `licenseConfig` にフォールバックします。
+
 ## コマンド
 
 | コマンド | 内容 |

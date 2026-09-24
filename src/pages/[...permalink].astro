@@ -171,6 +171,10 @@ const publishedInstant = getPublishedInstant(entry.data);
 const updatedInstant = getUpdatedInstant(entry.data);
 const postCommentEnabled =
 	entry.data.comment !== false && Boolean(resolveCommentOptions(commentConfig));
+// 单篇许可覆盖（转载内容）：`license: false` = 本篇不显示版权卡；对象 = 覆盖署名与许可
+const postLicense =
+	entry.data.license === false ? undefined : entry.data.license;
+const licenseVisible = licenseConfig.enable && entry.data.license !== false;
 const lastUpdatedNotice = resolveLastUpdatedNoticeOptions(articleConfig);
 const shareOptions = resolveArticleShareOptions(articleConfig);
 /*
@@ -329,7 +333,7 @@ const jsonLd = {
 				<SeriesCard context={series} class="mb-6 onload-animation" />
 			)}
 
-			{licenseConfig.enable && <License title={entry.data.title} slug={entry.id} pubDate={entry.data.published} class="mb-6 rounded-xl license-container onload-animation"></License>}
+			{licenseVisible && <License title={entry.data.title} slug={entry.id} pubDate={entry.data.published} license={postLicense} class="mb-6 rounded-xl license-container onload-animation"></License>}
 
 			{shareOptions && (
 				<ArticleShare

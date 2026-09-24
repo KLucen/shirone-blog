@@ -29,6 +29,22 @@ export const postSchema = z.object({
 	seriesOrder: z.number().int().optional(),
 	lang: z.string().optional().default(""),
 
+	/**
+	 * Per-post license override (for reprints). `false` hides the license card
+	 * on that post; an object replaces author/name/url, and any omitted field
+	 * falls back to the site `licenseConfig`.
+	 */
+	license: z
+		.union([
+			z.literal(false),
+			z.object({
+				author: z.string().optional().default(""),
+				name: z.string().optional().default(""),
+				url: z.string().optional().default(""),
+			}),
+		])
+		.optional(),
+
 	/* Post encryption */
 	encrypted: z.boolean().optional().default(false),
 	password: z

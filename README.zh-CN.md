@@ -154,6 +154,8 @@ draft: false
 
 常用可选字段包括 `updated`、`pinned`、`comment`、`lang`、`encrypted`、`password`、`passwordHint` 和 `hideHomeContent`。图片可以使用远程 URL、从 `public/` 开始的绝对路径，或相对于文章文件的路径。
 
+转载他人内容时可用 `license` 单独覆盖该篇的版权卡：`license: false` 直接不显示；传对象则改为署名原作者与来源——`license: { author: "原作者", name: "版权归原作者所有", url: "https://example.com/source" }`，未填写的字段回退站点 `licenseConfig`。
+
 ## 常用命令
 
 | 命令 | 作用 |

@@ -159,6 +159,19 @@ export type LicenseConfig = {
 	url: string;
 };
 
+/**
+ * 单篇许可覆盖（frontmatter `license`）：转载内容用它署名原作者/原许可，
+ * 未填写的字段回退站点 `licenseConfig`。类型与 content schema 保持一致。
+ */
+export type LicenseOverride = {
+	/** 版权持有者（默认回退站点作者 profileConfig.name） */
+	author?: string;
+	/** 许可名称（默认回退站点许可名） */
+	name?: string;
+	/** 许可或来源链接（默认回退站点许可链接） */
+	url?: string;
+};
+
 export type LIGHT_DARK_MODE =
 	| typeof LIGHT_MODE
 	| typeof DARK_MODE
