@@ -62,21 +62,11 @@ export const siteConfig: SiteConfig = withUserConfig("site", {
 		// 以 "/" 开头的 public 路径与远程 URL 仍可用，但会保留原图、不生成候选。
 		// desktop 用于 >= 1024px；mobile 仅用于 < 1024px 的首页，手机非首页不显示壁纸。
 		// 数组顺序就是轮播顺序；只需要静态 Banner 时，每组保留一张图片即可。
+		//
+		// 本站的实际壁纸由内容仓 config/site.yaml 覆盖，见该文件的 banner.src。
 		src: {
-			desktop: [
-				"https://pics.klucen.cn//wallpaper/20250419033923174500516318725.jpg",
-				"https://pics.klucen.cn//wallpaper/OIP-C.jpg",
-				"https://pics.klucen.cn//wallpaper/bizhihui_com_202504061743931435838716.jpg",
-				"https://pic-bed-1sw.pages.dev//wallpaper/wallpaper.jpg",
-				"https://pics.klucen.cn//desktopcover/3840x2160.jpg",
-			],
-			mobile: [
-				"https://pics.klucen.cn//bangumi/0d8e26c3d921b559fe.jpg",
-				"https://pics.klucen.cn//bangumi/73dac64f1996c68706.jpg",
-				"https://pics.klucen.cn//desktopcover/fulilian.jpg",
-				"https://pics.klucen.cn//mobliecover/978x2160.jpg",
-				"https://pics.klucen.cn//desktopcover/fengche.jpg",
-			],
+			desktop: ["assets/images/banner/desktop/1.webp"],
+			mobile: ["assets/images/banner/mobile/1.webp"],
 		},
 		// 图片裁切焦点："top"、"center" 或 "bottom"。
 		position: "center",
@@ -139,7 +129,9 @@ export const siteConfig: SiteConfig = withUserConfig("site", {
 	},
 	favicon: [
 		// 浏览器标签页图标，路径相对于 public 目录。
-		{ src: "https://pics.klucen.cn//cover/klucen_cover.png" },
+		//
+		// 本站使用图床图标，由内容仓 config/site.yaml 的 favicon 覆盖。
+		{ src: "/logo/icon.webp" },
 	],
 });
 
