@@ -84,7 +84,8 @@ const filteredItems = $derived(
 	<!-- 时间线事件流 -->
 	{#if filteredItems.length > 0}
 		<div class="timeline-section__list" aria-live="polite">
-			{#each filteredItems as item, index (item.title + item.date)}
+			<!-- 末尾拼序号：同日同名的两条会让 key 重复，进而抛 each_key_duplicate -->
+			{#each filteredItems as item, index (`${item.title}${item.date}#${index}`)}
 				{@const cat = item.category ? categoryMap.get(item.category) : undefined}
 				<TimelineCard
 					{item}

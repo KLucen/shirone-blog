@@ -57,7 +57,13 @@ const filteredItems = $derived(
 	<p class="skills-section__count">{filteredItems.length} {i18n(I18nKey.skillsCounts)}</p>
 
 	<div class="skills-section__grid" aria-live="polite">
-		{#each filteredItems as skill, index (skill.name)}
+		<!--
+			key 拼上序号：数据里出现同名技能时（"Node.js" 很容易被写两次），
+			只按 name 做 key 会让 Svelte 抛 each_key_duplicate，
+			整个技能岛直接不渲染——页面看起来就是「技能全没了」。
+			重名是数据问题，应该看得见，而不是让页面空白。
+		-->
+		{#each filteredItems as skill, index (`${skill.name}#${index}`)}
 			<SkillCard {skill} delay={Math.min(index, 7) * 45} />
 		{/each}
 	</div>

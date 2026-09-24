@@ -252,7 +252,8 @@ onMount(() => {
 	{:else if visibleAnimes.length > 0}
 		{#key `${selectedStatus}|${query}`}
 			<div class="anime-list {LIST_MODE_CLASS[listMode]}" bind:this={listEl}>
-				{#each visibleAnimes as anime, i (anime.title)}
+				<!-- key 拼序号：同名番剧（多季同名）会让 key 重复，Svelte 随即抛错不渲染 -->
+				{#each visibleAnimes as anime, i (`${anime.title}#${i}`)}
 					<AnimeCard {anime} delay={Math.min(i, 7) * 45} />
 				{/each}
 			</div>

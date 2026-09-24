@@ -192,7 +192,8 @@ $effect(() => {
 				aria-live="polite"
 				bind:this={gridEl}
 			>
-				{#each filteredItems as project, index (project.key)}
+				<!-- key 拼序号：key 重复时 Svelte 抛 each_key_duplicate，整块都不渲染 -->
+				{#each filteredItems as project, index (`${project.key}#${index}`)}
 					<ProjectCard {project} delay={Math.min(index, 7) * 45} />
 				{/each}
 			</div>
