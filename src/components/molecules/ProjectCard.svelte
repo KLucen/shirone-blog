@@ -121,7 +121,8 @@ const showCover = $derived(Boolean(project.cover) && !coverFailed);
 				class="project-card__technologies"
 				aria-label={i18n(I18nKey.projectTechnologies)}
 			>
-				{#each project.technologies as technology (technology)}
+				<!-- key 拼序号：同一项目里写重了同一个技术名，keyed each 会抛错让整块不渲染 -->
+				{#each project.technologies as technology, index (`${technology}#${index}`)}
 					<li>{technology}</li>
 				{/each}
 			</ul>
