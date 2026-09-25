@@ -94,7 +94,8 @@ const markerIcon = $derived(
 		<!-- 亮点 / 成就列表 -->
 		{#if item.highlights && item.highlights.length > 0}
 			<ul class="timeline-card__highlights">
-				{#each item.highlights as highlight (highlight)}
+				<!-- key 拼序号：同一条里写重一句成就，keyed each 会抛 each_key_duplicate 让整块不渲染 -->
+				{#each item.highlights as highlight, index (`${highlight}#${index}`)}
 					<li>{highlight}</li>
 				{/each}
 			</ul>
@@ -103,7 +104,7 @@ const markerIcon = $derived(
 		<!-- 技术栈 / 关联标签 -->
 		{#if item.tags && item.tags.length > 0}
 			<ul class="timeline-card__tags" aria-label="Tags">
-				{#each item.tags as tag (tag)}
+				{#each item.tags as tag, index (`${tag}#${index}`)}
 					<li>{tag}</li>
 				{/each}
 			</ul>
@@ -112,7 +113,7 @@ const markerIcon = $derived(
 		<!-- 外部链接列表 -->
 		{#if item.links && item.links.length > 0}
 			<div class="timeline-card__actions">
-				{#each item.links as link (link.url)}
+				{#each item.links as link, index (`${link.url}#${index}`)}
 					<a
 						href={link.url}
 						target="_blank"
