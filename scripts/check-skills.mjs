@@ -1,15 +1,41 @@
 // 校验 .agents/skills/ 下 AI 技能包的结构与引用完整性。
-// 用法：node scripts/check-skills.mjs
+// 用法：node scripts/check-skills.mjs [--strict-content-docs]
 // 通过 = 每个技能目录含 SKILL.md，frontmatter 合法（name 与目录一致、kebab-case、
-//        shirone- 前缀、description 非空），正文引用的仓库路径全部真实存在。
+//        shirone- 前缀、description 非空），正文引用的主题路径真实存在。
+//        external 模式下内容演示文档与可选页脚生成物可缺省，严格参数可恢复全量检查。
 // 失败 = 打印问题清单并 exit 1。
 
 import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
+import { FOOTER_HTML_TARGET } from "./content/config-domains.mjs";
+import { resolveContentSource } from "./content/resolve-source.mjs";
 
 const root = fileURLToPath(new URL("..", import.meta.url));
 const skillsDir = join(root, ".agents", "skills");
+const args = new Set(process.argv.slice(2));
+const unknownArgs = [...args].filter((arg) => arg !== "--strict-content-docs");
+if (unknownArgs.length > 0) {
+	console.error(`不支持的参数：${unknownArgs.join(", ")}`);
+	process.exit(1);
+}
+
+let contentSource;
+try {
+	contentSource = resolveContentSource(root);
+} catch (error) {
+	console.error(`无法解析内容源：${error.message}`);
+	process.exit(1);
+}
+const allowMissingContentReferences =
+	contentSource.mode === "external" && !args.has("--strict-content-docs");
+const contentDocRoots = new Set([
+	"src/content",
+	...(contentSource.mode === "external" && contentSource.mounts.content
+		? [contentSource.mounts.content]
+		: []),
+]);
+let missingContentReferences = 0;
 
 function fail(msg) {
 	console.error(`✗ ${msg}`);
@@ -39,15 +65,18 @@ const REPO_ROOT_SEGMENTS = new Set([
 	".github",
 	".agents",
 ]);
+for (const directory of contentDocRoots) {
+	REPO_ROOT_SEGMENTS.add(directory.split("/")[0]);
+}
 
 function extractRepoPaths(body) {
 	const paths = new Set();
 	for (const token of body.match(/`([^`\n]+)`/g) ?? []) {
 		const value = token.slice(1, -1).replace(/\/+$/, "");
-		if (!value.includes("/")) continue;
+		if (!/[\\/]/.test(value)) continue;
 		if (/[\s<>{}*"'~]/.test(value)) continue;
 		if (/^(@|\/|~|https?:\/\/)/.test(value)) continue;
-		if (!REPO_ROOT_SEGMENTS.has(value.split("/")[0])) continue;
+		if (!REPO_ROOT_SEGMENTS.has(value.split(/[\\/]/)[0])) continue;
 		paths.add(value);
 	}
 	return paths;
@@ -105,10 +134,24 @@ for (const entry of entries) {
 		fail(`${entry.name}/SKILL.md：description 超过 1024 字符`);
 	}
 
-	// 正文中的相对路径必须真实存在，防止文档移动后技能漂移。
+	// 先检查路径边界，再判断内容引用是否可缺省；主题源码与正式文档始终严格。
 	for (const rel of extractRepoPaths(content)) {
 		pathCount += 1;
+		if (rel.includes("\\") || rel.split("/").includes("..")) {
+			fail(`${entry.name}/SKILL.md 引用路径必须使用 /，且不能包含 ..：${rel}`);
+			continue;
+		}
 		if (!existsSync(join(root, ...rel.split("/")))) {
+			if (
+				allowMissingContentReferences &&
+				(rel === FOOTER_HTML_TARGET ||
+					[...contentDocRoots].some((directory) =>
+						rel.startsWith(`${directory}/`),
+					))
+			) {
+				missingContentReferences += 1;
+				continue;
+			}
 			fail(`${entry.name}/SKILL.md 引用了不存在的路径：${rel}`);
 		}
 	}
@@ -141,5 +184,12 @@ if (process.exitCode) {
 	console.error("\n✗ skills 校验未通过");
 	process.exit(1);
 } else {
-	console.log("\n✓ skills 结构与路径引用一致");
+	if (missingContentReferences > 0) {
+		console.log(
+			`external 内容源未提供 ${missingContentReferences} 处演示文档或可选页脚引用；使用 --strict-content-docs 强制检查`,
+		);
+		console.log("\n✓ skills 结构与主题路径引用一致（外部内容引用可缺省）");
+	} else {
+		console.log("\n✓ skills 结构与路径引用一致");
+	}
 }

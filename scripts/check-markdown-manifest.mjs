@@ -1,12 +1,36 @@
 // 校验自定义 Markdown 作者语法 manifest 的结构与仓库路径。
-// 用法：node scripts/check-markdown-manifest.mjs
+// 用法：node scripts/check-markdown-manifest.mjs [--strict-content-docs]
 
 import { existsSync, readFileSync } from "node:fs";
-import { isAbsolute, join, normalize } from "node:path";
+import { isAbsolute, join, win32 } from "node:path";
 import { fileURLToPath } from "node:url";
+import { resolveContentSource } from "./content/resolve-source.mjs";
 
 const root = fileURLToPath(new URL("..", import.meta.url));
 const manifestPath = join(root, "src", "plugins", "markdown", "manifest.json");
+const args = new Set(process.argv.slice(2));
+const unknownArgs = [...args].filter((arg) => arg !== "--strict-content-docs");
+if (unknownArgs.length > 0) {
+	console.error(`不支持的参数：${unknownArgs.join(", ")}`);
+	process.exit(1);
+}
+
+let contentSource;
+try {
+	contentSource = resolveContentSource(root);
+} catch (error) {
+	console.error(`无法解析内容源：${error.message}`);
+	process.exit(1);
+}
+const allowMissingContentDocs =
+	contentSource.mode === "external" && !args.has("--strict-content-docs");
+const contentDocRoots = new Set([
+	"src/content",
+	...(contentSource.mode === "external" && contentSource.mounts.content
+		? [contentSource.mounts.content]
+		: []),
+]);
+let missingContentDocs = 0;
 const VALID_STATUSES = new Set(["stable", "legacy", "deprecated"]);
 const VALID_CATEGORIES = new Set([
 	"container",
@@ -38,14 +62,25 @@ function validateRepoPath(path, owner, field) {
 	}
 	if (
 		isAbsolute(path) ||
-		normalize(path)
-			.split(/[\\/]+/)
-			.includes("..")
+		win32.isAbsolute(path) ||
+		path.includes("\\") ||
+		path.split("/").includes("..")
 	) {
-		fail(`${owner}.${field} 必须是仓库内相对路径：${path}`);
+		fail(
+			`${owner}.${field} 必须是使用 / 的仓库内相对路径，且不能包含 ..：${path}`,
+		);
 		return;
 	}
 	if (!existsSync(join(root, ...path.split("/")))) {
+		// 外部内容可以不包含主题演示文章；这不放宽主题代码或正式文档的检查。
+		if (
+			allowMissingContentDocs &&
+			field === "docs" &&
+			[...contentDocRoots].some((directory) => path.startsWith(`${directory}/`))
+		) {
+			missingContentDocs += 1;
+			return;
+		}
 		fail(`${owner}.${field} 指向不存在的文件：${path}`);
 	}
 }
@@ -241,4 +276,11 @@ const statusCounts = Object.fromEntries(
 console.log(`Markdown 自定义语法: ${syntaxes.length}`);
 console.log(`status: ${JSON.stringify(statusCounts)}`);
 console.log(`stylesheet packs: ${stylesheetPacks.length}`);
-console.log("✓ Markdown manifest 结构与路径有效");
+if (missingContentDocs > 0) {
+	console.log(
+		`external 内容源未提供 ${missingContentDocs} 处演示文档引用；使用 --strict-content-docs 强制检查`,
+	);
+	console.log("✓ Markdown manifest 结构与主题路径有效（内容演示文档可缺省）");
+} else {
+	console.log("✓ Markdown manifest 结构与路径有效");
+}

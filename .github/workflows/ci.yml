@@ -14,6 +14,9 @@ concurrency:
 permissions:
   contents: read
 
+env:
+  CONTENT_DIR: ${{ github.workspace }}/tests/fixtures/ci-content
+
 jobs:
   quality:
     name: Code quality
@@ -72,6 +75,9 @@ jobs:
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
+
+      - name: Prepare CI content
+        run: pnpm content:sync
 
       - name: Check Astro diagnostics
         run: pnpm exec astro check

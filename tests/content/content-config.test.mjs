@@ -3,13 +3,15 @@ import {
 	mkdirSync,
 	mkdtempSync,
 	readFileSync,
+	realpathSync,
 	rmSync,
+	symlinkSync,
 	writeFileSync,
 } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { describe, it } from "node:test";
-import { fileURLToPath } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
 import {
 	CONFIG_DOMAINS,
 	DOMAIN_BY_FILE,
@@ -159,7 +161,10 @@ describe("读取内容仓配置", () => {
 			"site.yaml": "- 我是个数组\n",
 		});
 		try {
-			expectFailure(() => readConfigOverrides(directory), /must be a key-value mapping/i);
+			expectFailure(
+				() => readConfigOverrides(directory),
+				/must be a key-value mapping/i,
+			);
 		} finally {
 			rmSync(base, { recursive: true, force: true });
 		}
@@ -181,7 +186,10 @@ describe("读取内容仓配置", () => {
 			"site.yaml": "banner: &loop\n  homeText: *loop\n",
 		});
 		try {
-			expectFailure(() => readConfigOverrides(directory), /circular reference/i);
+			expectFailure(
+				() => readConfigOverrides(directory),
+				/circular reference/i,
+			);
 		} finally {
 			rmSync(base, { recursive: true, force: true });
 		}
@@ -200,17 +208,19 @@ describe("读取内容仓配置", () => {
 });
 
 describe("生成覆盖层模块", () => {
-	it("没有覆盖时与仓库里已提交的空模块完全一致", () => {
-		const committed = readFileSync(
-			new URL(`../../${GENERATED_CONFIG_FILE}`, import.meta.url),
-			"utf8",
-		);
-		// 没有这条一致性，local 模式下重新生成就会弄脏 git status。
-		// 比对前抹平换行：Windows 的 core.autocrlf 会把签出的文件变成 CRLF，
-		// 而生成器一律写 LF —— git 自己会归一化，这里也照做。
-		const normalize = (text) => text.split("\r\n").join("\n");
-		assert.equal(generateModule([]).source, EMPTY_MODULE);
-		assert.equal(normalize(committed), EMPTY_MODULE);
+	it("没有覆盖时生成可加载的空模块", async () => {
+		const { source } = generateModule([]);
+		assert.equal(source, EMPTY_MODULE);
+		const base = mkdtempSync(join(tmpdir(), "shirone-empty-config-"));
+		const generated = join(base, "user-config.ts");
+		try {
+			writeFileSync(generated, source);
+			const module = await import(pathToFileURL(generated).href);
+			assert.deepEqual(module.userConfigOverrides, {});
+			assert.deepEqual(module.userConfigSources, []);
+		} finally {
+			rmSync(base, { recursive: true, force: true });
+		}
 	});
 
 	it("按领域标注类型，并把类型导入合并去重", () => {
@@ -322,29 +332,81 @@ describe("生成覆盖层模块", () => {
 	});
 });
 
-describe("类型校验（真实 tsc，跑在本仓库上）", () => {
+describe("类型校验（真实 tsc 与主题类型，生成物隔离）", () => {
 	const repoRoot = fileURLToPath(new URL("../..", import.meta.url));
-	const generated = join(repoRoot, GENERATED_CONFIG_FILE);
+	const projectGenerated = join(repoRoot, GENERATED_CONFIG_FILE);
 
 	/**
 	 * 用 `dryRun` 跑真实的生成 + 校验链路。
 	 *
-	 * `dryRun` 会先落盘再还原，因为 `tsc` 读的是磁盘上的文件；
-	 * 每个用例结束后都断言生成物没被改动，避免测试弄脏工作区。
+	 * `dryRun` 会先落盘再还原，因为 `tsc` 读的是磁盘上的文件。
+	 * 每次调用使用独立 root，继承项目 tsconfig 的真实类型与别名，
+	 * 只链接 TypeScript 包，让生成模块与校验缓存都留在临时目录。
+	 * 验证还原行为及项目文件不变，避免与并行测试读取项目配置产生竞争。
 	 */
 	function validate(files) {
+		const projectBefore = readFileSync(projectGenerated, "utf8");
 		const { base, directory } = createConfigDirectory(files);
-		const before = readFileSync(generated, "utf8");
+		const root = join(base, "repo");
+		const generated = join(root, GENERATED_CONFIG_FILE);
+		const errors = [];
+		let prepared = false;
+		let result;
 		try {
-			return syncUserConfig({
-				root: repoRoot,
+			mkdirSync(dirname(generated), { recursive: true });
+			mkdirSync(join(root, "node_modules"), { recursive: true });
+			symlinkSync(
+				realpathSync(join(repoRoot, "node_modules", "typescript")),
+				join(root, "node_modules", "typescript"),
+				process.platform === "win32" ? "junction" : "dir",
+			);
+			writeFileSync(
+				join(root, "tsconfig.json"),
+				JSON.stringify({ extends: join(repoRoot, "tsconfig.json") }),
+			);
+			writeFileSync(generated, EMPTY_MODULE);
+			prepared = true;
+			result = syncUserConfig({
+				root,
 				sourceRoot: dirname(directory),
 				dryRun: true,
 			});
+		} catch (error) {
+			errors.push(error);
 		} finally {
-			assert.equal(readFileSync(generated, "utf8"), before, "生成物应被还原");
-			rmSync(base, { recursive: true, force: true });
+			if (prepared) {
+				try {
+					assert.equal(
+						readFileSync(generated, "utf8"),
+						EMPTY_MODULE,
+						"临时生成物应被还原",
+					);
+				} catch (error) {
+					errors.push(error);
+				}
+			}
+			try {
+				assert.equal(
+					readFileSync(projectGenerated, "utf8"),
+					projectBefore,
+					"项目生成物不应被修改",
+				);
+			} catch (error) {
+				errors.push(error);
+			}
+			try {
+				rmSync(base, { recursive: true, force: true });
+			} catch (error) {
+				errors.push(error);
+			}
 		}
+		if (errors.length === 1) throw errors[0];
+		if (errors.length > 1) {
+			throw new AggregateError(errors, "配置校验与还原或清理同时失败", {
+				cause: errors[0],
+			});
+		}
+		return result;
 	}
 
 	it("合法配置通过校验", () => {

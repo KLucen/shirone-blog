@@ -1,0 +1,8 @@
+wallpaperMode:
+  defaultMode: none
+banner:
+  src:
+    desktop:
+      - /logo/icon.webp
+    mobile:
+      - /logo/icon.webp

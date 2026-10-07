@@ -2,6 +2,21 @@
 
 This project runs unit tests directly with Node. CI uses Node 22 and Node 24. Astro/Vite supplies TypeScript, aliases, and extension resolution during development, but `node --test` does not; code loaded by tests must work in both environments.
 
+## CI content preparation
+
+The theme checkout excludes materialized content, data, and user configuration.
+GitHub Actions sets `CONTENT_DIR` to `tests/fixtures/ci-content` and runs
+`pnpm content:sync` before Astro diagnostics. `pnpm build` performs the same
+sync as its first step. The fixture supplies a post, an about page, a series,
+a moment, empty data collections, and image configuration pointing to a tracked
+public logo. Music is disabled to avoid remote playlist requests during builds.
+
+This makes theme checks reproducible without private content credentials,
+including pull requests from forks. Production still resolves the real content
+repository through `shirone.content.json` and its deployment credentials.
+Tests for data resolvers must pass explicit items rather than assume a
+particular site's content.
+
 ## Runtime boundaries
 
 - Do not make a pure Node test path import a TypeScript module containing a runtime `enum`. Node's strip-only TypeScript loader does not support `enum`.

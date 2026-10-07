@@ -64,9 +64,18 @@ pnpm.cmd skills:package -- --zip
 
 ## 完成检查表
 
+`scripts/check-skills.mjs` 校验技能结构、公开索引和正文中的仓库路径引用。路径必须使用 `/`，且不得包含 `..`。主题代码、正式文档、规则和测试引用必须真实存在。
+
+在 `external` 内容源模式下，内容仓可以不保留主题演示文章，也可以不提供可选的 `config/footer.html`。因此，校验器允许缺失 `src/content/` 或 `mounts.content` 目标目录下的内容引用，以及配置登记表 `FOOTER_HTML_TARGET` 指定的页脚生成物。校验日志会报告缺省引用数量，不放宽其他代码或文档路径。`local` 模式仍要求所有引用存在；完整演示内容验收可以运行：
+
+```powershell
+node scripts/check-skills.mjs --strict-content-docs
+pnpm.cmd check:markdown-manifest --strict-content-docs
+```
+
 - `.agents/skills/` 是唯一技能源目录，没有重复副本。
 - README 索引、frontmatter 名称和目录名一致。
-- 技能引用的 `rules/`、`docs/`、`src/` 路径真实存在。
+- 技能引用的主题路径真实存在；外部内容引用仅按上述契约缺省，完整演示内容用严格参数验收。
 - `pnpm.cmd check:manifest` 通过。
 - 每个受影响技能的 `quick_validate.py` 通过。
 - ZIP 包含 `.codex-plugin/plugin.json` 和全部技能目录，并通过 `validate_plugin.py`。

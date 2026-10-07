@@ -66,7 +66,9 @@ $manifest.syntaxes | Where-Object id -eq "file-tree" | ConvertTo-Json -Depth 10
 | `tests` | 已有的语法、DOM 或页面回归测试；缺口如实保留为空数组 |
 | `notes` | 无法由其他字段表达的兼容或使用边界 |
 
-所有文件路径必须相对仓库根目录、使用 `/`，并指向真实文件。`network` 必须同时记录第三方请求和作者显式媒体 URL；空数组表示语法自身不会请求网络。
+所有文件路径必须相对仓库根目录、使用 `/`，且不得包含 `..`。主题实现、样式、测试、运行时模块和 `docs/` 下的正式文档必须指向真实文件。`network` 必须同时记录第三方请求和作者显式媒体 URL；空数组表示语法自身不会请求网络。
+
+在 `external` 内容源模式下，内容仓可以不保留主题演示文章。因此，仅 `docs` 字段中位于 `src/content/` 或清单 `mounts.content` 目标目录下的演示文档允许缺省；校验器会报告缺省引用数量，仍然检查这些路径的格式与边界。`local` 模式仍要求全部文档存在。使用 `--strict-content-docs` 可以在任何模式下强制检查全部演示文档。
 
 ## 5. 新语法准入流程
 
@@ -94,6 +96,8 @@ $manifest.syntaxes | Where-Object id -eq "file-tree" | ConvertTo-Json -Depth 10
 ```powershell
 pnpm.cmd check:markdown-manifest
 pnpm.cmd check:manifest
+# 完整演示内容验收：external 模式下也要求全部内容文档存在
+pnpm.cmd check:markdown-manifest --strict-content-docs
 ```
 
-校验器会检查 schema、ID 唯一性与排序、枚举值、语法形式、参数结构、运行时结构、条件样式包的特征与 CSS 唯一性，以及所有仓库路径是否存在。它不会代替语法渲染测试，也不会证明 CSS 或 Swup 生命周期正确。
+校验器会检查 schema、ID 唯一性与排序、枚举值、语法形式、参数结构、运行时结构、条件样式包的特征与 CSS 唯一性，以及仓库路径是否存在（外部内容演示文档的例外见字段契约）。它不会代替语法渲染测试，也不会证明 CSS 或 Swup 生命周期正确。
