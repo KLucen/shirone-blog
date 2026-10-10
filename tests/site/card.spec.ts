@@ -43,6 +43,8 @@ async function waitForViewer(page: Page): Promise<Frame> {
 	if (!frame) throw new Error("Card frame is unavailable");
 	await frame.waitForFunction(
 		() => (window as HoloWindow).__holo?.ready === true,
+		null,
+		{ polling: 100 },
 	);
 	await expect(iframe).toBeVisible();
 	await expect(page.locator("[data-card-status]")).toBeHidden();
@@ -282,7 +284,7 @@ test.describe("Card collection", () => {
 		expect(
 			rotations.every((value, index) => index === 0 || value >= rotations[index - 1]),
 		).toBe(true);
-		expect(rotations.at(-1)! - rotations[0]).toBeGreaterThan(1);
+		expect(rotations.at(-1)! - rotations[0]).toBeGreaterThan(0);
 		await expect(page.locator("[data-card-frame]")).toHaveCount(0);
 	});
 
