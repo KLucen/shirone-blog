@@ -115,6 +115,22 @@ export const es: Translation = {
 	[Key.timelineNoResults]: "Ningún evento coincide con esta categoría",
 
 	[Key.albums]: "Álbumes",
+	[Key.card]: "Tarjetas holográficas",
+	[Key.cardCabinet]: "Vitrina de tarjetas",
+	[Key.cardCollected]: "En la colección",
+	[Key.cardSlots]: "Espacios",
+	[Key.cardEmptySlot]: "Espacio vacío {number}",
+	[Key.cardAwaiting]: "A la espera de la próxima tarjeta",
+	[Key.cardExplore]: "Ver y ajustar",
+	[Key.cardBack]: "Volver a la vitrina",
+	[Key.cardCollection]: "Colección de personajes",
+	[Key.cardDescription]:
+		"Colecciona tus personajes favoritos y disfruta de sus destellos al tocarlos.",
+	[Key.cardViewer]: "Tarjeta holográfica interactiva",
+	[Key.cardOpen]: "Abrir por separado",
+	[Key.cardLoading]: "Cargando tarjeta holográfica",
+	[Key.cardUnavailable]:
+		"La tarjeta no se puede mostrar ahora. Ábrela por separado para verla.",
 	[Key.albumsBanner]: "Un archivo visual de lugares, personas y momentos.",
 	[Key.albumsNoResults]: "Ningún álbum coincide con tus filtros",
 	[Key.albumsCounts]: "álbumes",

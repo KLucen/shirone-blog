@@ -1,0 +1,26 @@
+---
+import CardViewer from "@components/organisms/CardViewer.astro";
+import I18nKey from "@i18n/i18nKey";
+import { i18n } from "@i18n/translation";
+import MainGridLayout from "@layouts/MainGridLayout.astro";
+import {
+	loadCardCollection,
+	type CollectionCard,
+} from "@utils/card-collection";
+
+export function getStaticPaths() {
+	return loadCardCollection().map((card) => ({
+		params: { id: card.id },
+		props: { card },
+	}));
+}
+
+interface Props {
+	card: CollectionCard;
+}
+const { card } = Astro.props;
+---
+
+<MainGridLayout title={`${card.title} · ${i18n(I18nKey.card)}`} description={card.subtitle} page="card">
+	<CardViewer card={card} />
+</MainGridLayout>

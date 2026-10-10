@@ -24,6 +24,8 @@ const pages = [
 	{ name: "项目", path: "/projects/" },
 	{ name: "设备展示", path: "/devices/" },
 	{ name: "游戏", path: "/games/" },
+	{ name: "闪卡", path: "/card/" },
+	{ name: "闪卡调制", path: "/card/view/klee/" },
 	{ name: "时间线", path: "/timeline/" },
 	{ name: "受保护相册", path: "/albums/EncryptedExample/" },
 	{ name: "关于", path: "/about/" },
@@ -95,6 +97,26 @@ async function openSitePage(
 	);
 	// Svelte 客户端挂载（归档页 client:only 需 onMount 构建分组）
 	await page.waitForTimeout(500);
+	if (path === "/card/") {
+		await page.waitForFunction(() => {
+			const cabinet = document.querySelector<HTMLElement>(
+				"shirone-card-cabinet",
+			);
+			return ["ready", "fallback"].includes(
+				cabinet?.dataset.previewState ?? "",
+			);
+		});
+	}
+	if (path === "/card/view/klee/") {
+		await page.waitForFunction(() => {
+			const frame =
+				document.querySelector<HTMLIFrameElement>("[data-card-frame]");
+			const viewer = frame?.contentWindow as
+				| (Window & { __holo?: { ready: boolean } })
+				| null;
+			return viewer?.__holo?.ready === true;
+		});
+	}
 }
 
 for (const mode of modes) {

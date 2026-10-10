@@ -64,6 +64,7 @@ research/
 .playwright-cli/
 test-results/
 playwright-report/
+artifacts/card/
 tests/site/visual.spec.ts-snapshots/
 
 # Lighthouse local reports
@@ -81,6 +82,7 @@ artifacts/shirone-ai-*
 /src/config/FooterConfig.html
 /src/assets/images/
 /public/images/
+/public/card/
 /public/assets/banner/
 /public/assets/music/
 /public/assets/projects/

@@ -114,6 +114,22 @@ export const en: Translation = {
 	[Key.timelineNoResults]: "No timeline events matched this category",
 
 	[Key.albums]: "Albums",
+	[Key.card]: "Holographic Cards",
+	[Key.cardCabinet]: "Card cabinet",
+	[Key.cardCollected]: "Collected",
+	[Key.cardSlots]: "Slots",
+	[Key.cardEmptySlot]: "Empty slot {number}",
+	[Key.cardAwaiting]: "Next card awaits",
+	[Key.cardExplore]: "View and adjust",
+	[Key.cardBack]: "Back to cabinet",
+	[Key.cardCollection]: "Character collection",
+	[Key.cardDescription]:
+		"Collect favorite characters and watch light shimmer at your fingertips.",
+	[Key.cardViewer]: "Interactive holographic card",
+	[Key.cardOpen]: "Open separately",
+	[Key.cardLoading]: "Loading holographic card",
+	[Key.cardUnavailable]:
+		"The card cannot be displayed right now. Open it separately to view it.",
 	[Key.albumsBanner]: "A visual archive of places, people and passing moments.",
 	[Key.albumsNoResults]: "No albums matched your filters",
 	[Key.albumsCounts]: "albums",

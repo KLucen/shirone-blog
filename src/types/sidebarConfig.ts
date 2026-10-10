@@ -40,6 +40,7 @@ export type SidebarPage =
 	| "games" // 游戏展示
 	| "timeline" // 时间线
 	| "albums" // 相册
+	| "card" // 闪卡收藏
 	| "about" // 关于
 	| "categories" // 分类索引
 	| "tags" // 标签索引

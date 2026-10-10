@@ -115,6 +115,21 @@ export const vi: Translation = {
 	[Key.timelineNoResults]: "Không có sự kiện nào phù hợp với danh mục này",
 
 	[Key.albums]: "Album",
+	[Key.card]: "Thẻ hologram",
+	[Key.cardCabinet]: "Tủ trưng bày thẻ",
+	[Key.cardCollected]: "Đã sưu tầm",
+	[Key.cardSlots]: "Ô trưng bày",
+	[Key.cardEmptySlot]: "Ô trống {number}",
+	[Key.cardAwaiting]: "Đang chờ thẻ tiếp theo",
+	[Key.cardExplore]: "Xem và điều chỉnh",
+	[Key.cardBack]: "Trở lại tủ trưng bày",
+	[Key.cardCollection]: "Bộ sưu tập nhân vật",
+	[Key.cardDescription]:
+		"Sưu tầm nhân vật yêu thích và ngắm ánh sáng lấp lánh trên đầu ngón tay.",
+	[Key.cardViewer]: "Thẻ hologram tương tác",
+	[Key.cardOpen]: "Mở riêng",
+	[Key.cardLoading]: "Đang tải thẻ hologram",
+	[Key.cardUnavailable]: "Hiện không thể hiển thị thẻ. Hãy mở riêng để xem.",
 	[Key.albumsBanner]:
 		"Kho lưu trữ hình ảnh về địa điểm, con người và những khoảnh khắc đã qua.",
 	[Key.albumsNoResults]: "Không có album nào khớp bộ lọc",

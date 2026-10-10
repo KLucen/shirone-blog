@@ -117,6 +117,22 @@ export const id: Translation = {
 	[Key.timelineNoResults]: "Tidak ada peristiwa yang cocok dengan kategori ini",
 
 	[Key.albums]: "Album",
+	[Key.card]: "Kartu Holografik",
+	[Key.cardCabinet]: "Etalase kartu",
+	[Key.cardCollected]: "Terkoleksi",
+	[Key.cardSlots]: "Slot",
+	[Key.cardEmptySlot]: "Slot kosong {number}",
+	[Key.cardAwaiting]: "Menanti kartu berikutnya",
+	[Key.cardExplore]: "Lihat dan sesuaikan",
+	[Key.cardBack]: "Kembali ke etalase",
+	[Key.cardCollection]: "Koleksi karakter",
+	[Key.cardDescription]:
+		"Koleksi karakter favorit dan nikmati kilauan cahaya di ujung jari.",
+	[Key.cardViewer]: "Kartu holografik interaktif",
+	[Key.cardOpen]: "Buka terpisah",
+	[Key.cardLoading]: "Memuat kartu holografik",
+	[Key.cardUnavailable]:
+		"Kartu belum dapat ditampilkan. Buka secara terpisah untuk melihatnya.",
 	[Key.albumsBanner]: "Arsip visual tempat, orang, dan momen yang berlalu.",
 	[Key.albumsNoResults]: "Tidak ada album yang cocok dengan filter",
 	[Key.albumsCounts]: "album",

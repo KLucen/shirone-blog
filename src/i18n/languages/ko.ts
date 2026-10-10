@@ -112,6 +112,22 @@ export const ko: Translation = {
 	[Key.timelineNoResults]: "이 분류에 해당하는 타임라인 기록이 없습니다",
 
 	[Key.albums]: "앨범",
+	[Key.card]: "홀로그램 카드",
+	[Key.cardCabinet]: "카드 진열장",
+	[Key.cardCollected]: "수집 완료",
+	[Key.cardSlots]: "전시 공간",
+	[Key.cardEmptySlot]: "빈 전시 공간 {number}",
+	[Key.cardAwaiting]: "다음 카드를 기다리는 중",
+	[Key.cardExplore]: "보기 및 조정",
+	[Key.cardBack]: "진열장으로 돌아가기",
+	[Key.cardCollection]: "캐릭터 컬렉션",
+	[Key.cardDescription]:
+		"좋아하는 캐릭터를 간직하고 손끝에서 반짝이는 빛을 즐겨 보세요.",
+	[Key.cardViewer]: "인터랙티브 홀로그램 카드",
+	[Key.cardOpen]: "별도로 열기",
+	[Key.cardLoading]: "홀로그램 카드 불러오는 중",
+	[Key.cardUnavailable]:
+		"지금은 카드를 표시할 수 없습니다. 별도로 열어 확인해 주세요.",
 	[Key.albumsBanner]: "장소와 사람, 스쳐 가는 순간을 담은 시각 아카이브입니다.",
 	[Key.albumsNoResults]: "조건에 맞는 앨범이 없습니다",
 	[Key.albumsCounts]: "개 앨범",

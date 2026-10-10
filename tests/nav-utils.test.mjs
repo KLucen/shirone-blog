@@ -16,6 +16,11 @@ test("resolvePageKey handles root deployment", () => {
 		"friends",
 	);
 	assert.equal(resolvePageKey(new URL("https://example.com/games/")), "games");
+	assert.equal(resolvePageKey(new URL("https://example.com/card/")), "card");
+	assert.equal(
+		resolvePageKey(new URL("https://example.com/card/klee/")),
+		"card",
+	);
 	assert.equal(
 		resolvePageKey(new URL("https://example.com/albums/AcgExample/")),
 		"albums",
@@ -32,6 +37,14 @@ test("resolvePageKey handles root deployment", () => {
 
 test("resolvePageKey handles subpath deployment with base override", () => {
 	const base = "/Shirone/";
+	assert.equal(
+		resolvePageKey(new URL("https://example.com/Shirone/card/"), base),
+		"card",
+	);
+	assert.equal(
+		resolvePageKey(new URL("https://example.com/Shirone/card/klee/"), base),
+		"card",
+	);
 	assert.equal(
 		resolvePageKey(new URL("https://example.com/Shirone/"), base),
 		"home",

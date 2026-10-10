@@ -104,6 +104,12 @@ export const LinkPresets: Record<string, NavBarLink> = {
 		icon: "material-symbols:photo-library-outline-rounded",
 		pageKey: "albums",
 	},
+	Card: {
+		name: i18n(I18nKey.card),
+		url: "/card/",
+		icon: "material-symbols:style-outline-rounded",
+		pageKey: "card",
+	},
 	Categories: {
 		name: i18n(I18nKey.categories),
 		url: "/categories/",
@@ -150,6 +156,7 @@ const defaultNavBarConfig: NavBarConfig = {
 			name: i18n(I18nKey.more),
 			icon: "material-symbols:apps-rounded",
 			children: [
+				LinkPresets.Card,
 				LinkPresets.Timeline,
 				LinkPresets.Projects,
 				LinkPresets.Devices,
