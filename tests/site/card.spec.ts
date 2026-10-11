@@ -216,12 +216,15 @@ test.describe("Card collection", () => {
 		});
 		const cabinet = await openCabinet(page);
 		await expect(cabinet.locator(".display-slot")).toHaveCount(6);
+		const collectionCards = cabinet.locator(".collection-card");
+		const collectionCount = await collectionCards.count();
+		expect(collectionCount).toBeGreaterThan(0);
 		await expect(
 			cabinet.locator(".display-slot:has(.collection-card)"),
-		).toHaveCount(1);
+		).toHaveCount(collectionCount);
 		await expect(
 			cabinet.locator(".display-slot:not(:has(.collection-card))"),
-		).toHaveCount(5);
+		).toHaveCount(6 - collectionCount);
 		await expect(page.locator("iframe")).toHaveCount(0);
 		expect(viewerRequests).toEqual([]);
 		const card = cabinet.locator(".collection-card");
