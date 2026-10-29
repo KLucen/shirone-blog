@@ -1,0 +1,124 @@
+---
+/**
+ * 关于页区块卡片骨架（分子）。
+ * 版式取自 github-profile 参考稿的编号卡：眉标 `NN / LABEL`（主色等宽字）+
+ * 大标题 + 可选副标题，右上角可选等宽小字元信息，下方为内容插槽。
+ *
+ * 纯 SSR：自己不渲染任何文案，index / eyebrow / headline / subtitle / meta
+ * 全部由调用方从 aboutData 与 i18n 传入，组件内不出现写死的用户可见文字。
+ *
+ * 用法：<AboutCard index="01" eyebrow={label} headline={h} meta={m}>…</AboutCard>
+ */
+interface Props {
+	/** 两位区块序号，如 "01" */
+	index: string;
+	/** 区块标签（左上角眉标，通常是 i18n 的区块名） */
+	eyebrow: string;
+	/** 区块大标题（多为 i18n 模板替换后的整句）；区块本身没有标题语义时可省略 */
+	headline?: string;
+	/** 可选副标题 */
+	subtitle?: string;
+	/** 可选右上角元信息（等宽小字，如「公开数据」） */
+	meta?: string;
+	class?: string;
+}
+
+const {
+	index,
+	eyebrow,
+	headline = "",
+	subtitle = "",
+	meta = "",
+	class: className = "",
+} = Astro.props;
+---
+
+<section class={`m3-about-card ${className}`.trim()}>
+	<header class="m3-about-card__head">
+		<div class="m3-about-card__head-main">
+			<p class="m3-about-card__eyebrow">
+				<span class="m3-about-card__index">{index}</span>
+				<span class="m3-about-card__separator" aria-hidden="true">/</span>
+				<span>{eyebrow}</span>
+			</p>
+			{headline && <h2 class="m3-about-card__headline">{headline}</h2>}
+			{subtitle && <p class="m3-about-card__subtitle">{subtitle}</p>}
+		</div>
+		{meta && <p class="m3-about-card__meta">{meta}</p>}
+	</header>
+	<div class="m3-about-card__content">
+		<slot />
+	</div>
+</section>
+
+<style lang="stylus">
+.m3-about-card
+	display: flex
+	flex-direction: column
+	gap: var(--m3e-space-5)
+	box-sizing: border-box
+	padding: var(--m3e-space-6)
+	border: 1px solid var(--outline-variant)
+	border-radius: var(--shape-corner-l)
+	background: var(--card-bg)
+	color: var(--on-surface)
+	/* 卡片内部一律走设计令牌：明暗模式下 --card-bg / --primary 自动切换 */
+	@media (min-width: 768px)
+		padding: var(--m3e-space-8)
+
+	&__head
+		display: flex
+		align-items: flex-start
+		justify-content: space-between
+		gap: var(--m3e-space-4)
+
+	&__head-main
+		min-width: 0
+
+	&__eyebrow
+		display: flex
+		align-items: baseline
+		gap: 0.45em
+		margin: 0 0 var(--m3e-space-2)
+		color: var(--primary)
+		font-family: var(--m3e-font-mono-family, ui-monospace, monospace)
+		font-size: 0.6875rem
+		font-weight: 700
+		letter-spacing: 0.09em
+		line-height: 1.2
+
+	&__index
+		font-variant-numeric: tabular-nums
+
+	&__separator
+		opacity: 0.55
+
+	&__headline
+		margin: 0
+		color: var(--on-surface)
+		font: var(--m3e-type-title-large)
+		font-weight: 700
+		line-height: 1.25
+		overflow-wrap: anywhere
+
+	&__subtitle
+		margin: var(--m3e-space-2) 0 0
+		color: var(--on-surface-variant)
+		font: var(--m3e-type-body-medium)
+		line-height: 1.6
+
+	&__meta
+		flex-shrink: 0
+		margin: 0
+		color: var(--on-surface-variant)
+		font-family: var(--m3e-font-mono-family, ui-monospace, monospace)
+		font-size: 0.6875rem
+		font-weight: 600
+		letter-spacing: 0.09em
+		line-height: 1.2
+		white-space: nowrap
+		text-transform: uppercase
+
+	&__content
+		min-width: 0
+</style>

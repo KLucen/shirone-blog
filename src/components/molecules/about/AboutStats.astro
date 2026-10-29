@@ -1,0 +1,106 @@
+---
+/**
+ * 概览卡内容（分子）：stats 网格。
+ * 版式对照 github-profile 参考稿的 01 / GITHUB 卡：每个统计一格，
+ * 大号 tabular-nums 数字 + 标签，整格是外链（新窗口 + rel="noopener"）。
+ *
+ * 桌面端单行时用竖分隔线还原参考稿的「列」结构；一旦格数超过列数（会换行），
+ * 就撤掉竖线，避免第二行行首出现多余的分隔线。
+ */
+import MetaIcon from "@components/atoms/display/MetaIcon.astro";
+import type { AboutStat } from "@/types/aboutData";
+
+interface Props {
+	stats: AboutStat[];
+	class?: string;
+}
+
+const { stats, class: className = "" } = Astro.props;
+
+/** 桌面端列数：最多 4 列，格数少时按格数收窄 */
+const columns = Math.min(Math.max(stats.length, 1), 4);
+/** 只有单行排布（格数 ≤ 列数）时竖分隔线才是正确的 */
+const ruled = stats.length <= columns;
+const style = `--about-stat-columns: ${columns}`;
+---
+
+<ul
+	class={`m3-about-stats ${ruled ? "m3-about-stats--ruled" : ""} ${className}`.trim()}
+	style={style}
+>
+	{
+		stats.map((stat) => (
+			<li class="m3-about-stats__item">
+				<a
+					class="m3-about-stats__link"
+					href={stat.href}
+					target="_blank"
+					rel="noopener"
+				>
+					<MetaIcon icon={stat.icon} class="m3-about-stats__icon" />
+					<span class="m3-about-stats__value">{stat.value}</span>
+					<span class="m3-about-stats__label">{stat.label}</span>
+				</a>
+			</li>
+		))
+	}
+</ul>
+
+<style lang="stylus">
+.m3-about-stats
+	display: grid
+	grid-template-columns: minmax(0, 1fr)
+	gap: var(--m3e-space-5)
+	margin: 0
+	padding: 0
+	list-style: none
+	@media (min-width: 640px)
+		grid-template-columns: repeat(2, minmax(0, 1fr))
+	@media (min-width: 1024px)
+		grid-template-columns: repeat(var(--about-stat-columns, 4), minmax(0, 1fr))
+
+	&--ruled
+		@media (min-width: 1024px)
+			.m3-about-stats__item:not(:first-child)
+				padding-inline-start: var(--m3e-space-5)
+				border-inline-start: 1px solid var(--outline-variant)
+
+	&__link
+		display: flex
+		flex-direction: column
+		align-items: flex-start
+		gap: var(--m3e-space-2)
+		height: 100%
+		color: inherit
+		text-decoration: none
+		transition: transform var(--m3e-duration-short) var(--m3e-easing-emphasized-decelerate)
+		&:hover
+			transform: translateY(-2px)
+			.m3-about-stats__value
+				color: var(--primary)
+		&:focus-visible
+			outline: 2px solid var(--primary)
+			outline-offset: 4px
+			border-radius: var(--shape-corner-s)
+
+	&__value
+		color: var(--on-surface)
+		font: var(--m3e-type-headline-large)
+		font-weight: 700
+		line-height: 1.1
+		/* 数字等宽：多格并排时小数点与位数对齐 */
+		font-variant-numeric: tabular-nums
+		transition: color var(--m3e-duration-short) var(--m3e-easing-standard)
+
+	&__label
+		color: var(--on-surface-variant)
+		font: var(--m3e-type-body-large)
+		font-weight: 600
+		line-height: 1.4
+
+@media (prefers-reduced-motion: reduce)
+	.m3-about-stats__link
+		transition: none
+		&:hover
+			transform: none
+</style>

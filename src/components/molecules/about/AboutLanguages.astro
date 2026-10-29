@@ -1,0 +1,319 @@
+---
+/**
+ * 代码构成卡内容（分子）：纯 SVG 环形图 + 语言图例 + 归并行。
+ * 版式对照 github-profile 参考稿的 02 / CODE COMPOSITION 卡。
+ *
+ * 环形图用 stroke-dasharray 手算弧长（自绘，无第三方图表库）：
+ * 每段 = percent / Σpercent × 周长，绕 -90° 从 12 点方向起画。
+ * 颜色取 `languages[].color`——这是内容色（每种语言在数据里带自己的色值），
+ * 属于 M3E 调色板之外的唯一例外，其余尺寸/间距/字体/动效全部走 token。
+ */
+import type { AboutLanguage, AboutLanguageGroup } from "@/types/aboutData";
+
+interface Props {
+	languages: AboutLanguage[];
+	languageGroups: AboutLanguageGroup[];
+	/** 图例下方计数行的单位文案（i18n aboutLanguagesUnit） */
+	unitLabel: string;
+	class?: string;
+}
+
+const {
+	languages,
+	languageGroups,
+	unitLabel,
+	class: className = "",
+} = Astro.props;
+
+const RADIUS = 78;
+const CIRCUMFERENCE = 2 * Math.PI * RADIUS;
+/** 相邻扇区之间留出的弧长空隙（环周长单位），避免同色系紧贴时糊成一片 */
+const GAP = languages.length > 1 ? 2 : 0;
+
+const positives = languages.map((language) =>
+	Number.isFinite(language.percent) && language.percent > 0
+		? language.percent
+		: 0,
+);
+const total = positives.reduce((sum, value) => sum + value, 0);
+
+let cursor = 0;
+const segments = languages.map((language, index) => {
+	const fraction = total > 0 ? positives[index] / total : 0;
+	const start = cursor;
+	cursor += fraction;
+	const dash = Math.max(fraction * CIRCUMFERENCE - GAP, 0);
+	return {
+		name: language.name,
+		color: language.color,
+		percent: language.percent,
+		dash,
+		offset: -start * CIRCUMFERENCE,
+	};
+});
+
+/** 圆心展示占比最高的语言；空数据时不渲染圆心内容 */
+const top = languages.reduce<AboutLanguage | undefined>(
+	(best, language) =>
+		best === undefined || language.percent > best.percent ? language : best,
+	undefined,
+);
+const hasRing = segments.some((segment) => segment.dash > 0);
+
+const formatPercent = (value: number) =>
+	`${(Number.isFinite(value) ? value : 0).toFixed(1)}%`;
+---
+
+<div class={`m3-about-languages ${className}`.trim()}>
+	<div class="m3-about-languages__chart">
+		<svg
+			class="m3-about-languages__donut"
+			viewBox="0 0 200 200"
+			role="img"
+			aria-label={`${top ? top.name : ""} ${top ? formatPercent(top.percent) : ""}`
+				.trim()}
+		>
+			<circle
+				class="m3-about-languages__track"
+				cx="100"
+				cy="100"
+				r={RADIUS}
+				fill="none"
+				stroke-width="20"></circle>
+			{
+				segments.map((segment) => (
+					<circle
+						cx="100"
+						cy="100"
+						r={RADIUS}
+						fill="none"
+						stroke={segment.color}
+						stroke-width="20"
+						stroke-dasharray={`${segment.dash} ${CIRCUMFERENCE - segment.dash}`}
+						stroke-dashoffset={segment.offset}
+						transform="rotate(-90 100 100)"
+					/>
+				))
+			}
+		</svg>
+		{
+			top && hasRing && (
+				<div class="m3-about-languages__center" aria-hidden="true">
+					<span class="m3-about-languages__center-value">
+						{formatPercent(top.percent)}
+					</span>
+					<span class="m3-about-languages__center-label">{top.name}</span>
+				</div>
+			)
+		}
+	</div>
+
+	<div class="m3-about-languages__legend">
+		<ul class="m3-about-languages__list">
+			{
+				languages.map((language) => (
+					<li class="m3-about-languages__item">
+						<span
+							class="m3-about-languages__swatch"
+							style={`background: ${language.color}`}
+							aria-hidden="true"
+						/>
+						<span class="m3-about-languages__name">{language.name}</span>
+						<span class="m3-about-languages__percent">
+							{formatPercent(language.percent)}
+						</span>
+					</li>
+				))
+			}
+		</ul>
+
+		<p class="m3-about-languages__count">
+			<span class="m3-about-languages__count-label">{unitLabel}</span>
+			<span class="m3-about-languages__count-value">{languages.length}</span>
+		</p>
+
+		{
+			languageGroups.length > 0 && (
+				<ul class="m3-about-languages__groups">
+					{languageGroups.map((group) => (
+						<li class="m3-about-languages__group">
+							<span class="m3-about-languages__group-head">
+								<span class="m3-about-languages__group-label">{group.label}</span>
+								<span class="m3-about-languages__group-percent">
+									{formatPercent(group.percent)}
+								</span>
+							</span>
+							<span class="m3-about-languages__group-track" aria-hidden="true">
+								<span
+									class="m3-about-languages__group-bar"
+									style={`width: ${Math.min(Math.max(group.percent, 0), 100)}%`}
+								/>
+							</span>
+						</li>
+					))}
+				</ul>
+			)
+		}
+	</div>
+</div>
+
+<style lang="stylus">
+.m3-about-languages
+	display: grid
+	grid-template-columns: minmax(0, 1fr)
+	gap: var(--m3e-space-6)
+	align-items: center
+	@media (min-width: 900px)
+		grid-template-columns: 14rem minmax(0, 1fr)
+		gap: var(--m3e-space-8)
+
+	&__chart
+		position: relative
+		justify-self: center
+		width: 100%
+		max-width: 15rem
+
+	&__donut
+		display: block
+		width: 100%
+		height: auto
+
+	&__track
+		stroke: var(--surface-container-highest)
+
+	&__center
+		position: absolute
+		inset: 0
+		display: flex
+		flex-direction: column
+		align-items: center
+		justify-content: center
+		gap: var(--m3e-space-1)
+		pointer-events: none
+
+	&__center-value
+		color: var(--on-surface)
+		font: var(--m3e-type-title-large)
+		font-weight: 700
+		font-variant-numeric: tabular-nums
+		line-height: 1.1
+
+	&__center-label
+		max-width: 70%
+		overflow: hidden
+		color: var(--on-surface-variant)
+		font: var(--m3e-type-body-small)
+		text-align: center
+		text-overflow: ellipsis
+		white-space: nowrap
+
+	&__legend
+		min-width: 0
+
+	&__list
+		display: grid
+		grid-template-columns: minmax(0, 1fr)
+		gap: var(--m3e-space-2)
+		margin: 0
+		padding: 0
+		list-style: none
+		@media (min-width: 640px)
+			grid-template-columns: repeat(2, minmax(0, 1fr))
+			column-gap: var(--m3e-space-6)
+
+	&__item
+		display: flex
+		align-items: center
+		gap: var(--m3e-space-3)
+		min-width: 0
+		padding-block: var(--m3e-space-1)
+
+	&__swatch
+		flex-shrink: 0
+		width: 0.75rem
+		height: 0.75rem
+		border-radius: var(--shape-corner-xs)
+		/* 色值来自数据（语言自带色），见文件头注释 */
+
+	&__name
+		min-width: 0
+		overflow: hidden
+		color: var(--on-surface)
+		font: var(--m3e-type-body-medium)
+		font-weight: 600
+		text-overflow: ellipsis
+		white-space: nowrap
+
+	&__percent
+		margin-inline-start: auto
+		color: var(--on-surface-variant)
+		font-family: var(--m3e-font-mono-family, ui-monospace, monospace)
+		font-size: 0.8125rem
+		font-variant-numeric: tabular-nums
+
+	&__count
+		display: flex
+		align-items: baseline
+		gap: var(--m3e-space-2)
+		margin: var(--m3e-space-5) 0 0
+		padding-top: var(--m3e-space-4)
+		border-top: 1px solid var(--outline-variant)
+		color: var(--on-surface-variant)
+		font: var(--m3e-type-body-small)
+
+	&__count-label
+		font-family: var(--m3e-font-mono-family, ui-monospace, monospace)
+		font-size: 0.6875rem
+		font-weight: 600
+		letter-spacing: 0.09em
+		text-transform: uppercase
+
+	&__count-value
+		margin-inline-start: auto
+		color: var(--on-surface)
+		font: var(--m3e-type-title-medium)
+		font-weight: 700
+		font-variant-numeric: tabular-nums
+
+	&__groups
+		display: grid
+		grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr))
+		gap: var(--m3e-space-4)
+		margin: var(--m3e-space-5) 0 0
+		padding: 0
+		list-style: none
+
+	&__group
+		display: flex
+		flex-direction: column
+		gap: var(--m3e-space-2)
+
+	&__group-head
+		display: flex
+		align-items: baseline
+		justify-content: space-between
+		gap: var(--m3e-space-2)
+
+	&__group-label
+		color: var(--on-surface)
+		font: var(--m3e-type-label-large)
+
+	&__group-percent
+		color: var(--on-surface-variant)
+		font-family: var(--m3e-font-mono-family, ui-monospace, monospace)
+		font-size: 0.75rem
+		font-variant-numeric: tabular-nums
+
+	&__group-track
+		display: block
+		height: 0.25rem
+		border-radius: var(--shape-corner-full)
+		background: var(--surface-container-highest)
+		overflow: hidden
+
+	&__group-bar
+		display: block
+		height: 100%
+		border-radius: var(--shape-corner-full)
+		background: var(--primary)
+</style>

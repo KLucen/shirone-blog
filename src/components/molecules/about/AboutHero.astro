@@ -1,0 +1,265 @@
+---
+/**
+ * 关于页 Hero（分子）：头像 + 姓名 / @handle / 一句话简介，
+ * 下方是外链按钮组，右侧一条「自动更新」状态行（呼吸绿点 + 更新计划 + 采集时间）。
+ *
+ * 版式对照 github-profile 参考稿的顶部区：
+ * 头像取站点 profileConfig.avatar（aboutData 不承载头像），其余文案全部由调用方传入。
+ * 纯 SSR：不引入任何客户端脚本，状态点动效是 CSS keyframes，
+ * prefers-reduced-motion 下退化为静态点（与参考稿的 status-static-* 同义）。
+ */
+import { getImage } from "astro:assets";
+import Avatar from "@components/atoms/display/Avatar.svelte";
+import { resolveImageAsset } from "@utils/asset-utils";
+import { Icon } from "astro-icon/components";
+import { profileConfig } from "@/config";
+import type { AboutLink } from "@/types/aboutData";
+
+interface Props {
+	name: string;
+	/** GitHub 用户名，渲染为 `@handle` */
+	handle: string;
+	tagline: string;
+	links: AboutLink[];
+	/** 状态行主文案（i18n aboutAutoUpdate） */
+	statusLabel: string;
+	/** 状态行时间文案（i18n aboutUpdatedAt，`{date}` 已替换） */
+	updatedText: string;
+	class?: string;
+}
+
+const {
+	name,
+	handle,
+	tagline,
+	links,
+	statusLabel,
+	updatedText,
+	class: className = "",
+} = Astro.props;
+
+// 头像沿用站点资料配置；本地相对路径经 assets 管线解析，远程 / 绝对路径原样透传。
+const avatarAsset = await resolveImageAsset(profileConfig.avatar ?? "");
+let avatarSrc = typeof avatarAsset === "string" ? avatarAsset : avatarAsset.src;
+let avatarWidth: number | undefined;
+let avatarHeight: number | undefined;
+// SVG 走 sharp 无意义（也不会被栅格化），只有位图才做一次定宽转码。
+if (typeof avatarAsset !== "string" && !/\.svg$/i.test(avatarAsset.src)) {
+	const optimized = await getImage({
+		src: avatarAsset,
+		width: 320,
+		format: "webp",
+		quality: 80,
+	});
+	avatarSrc = optimized.src;
+	avatarWidth = 320;
+	avatarHeight = 320;
+}
+---
+
+<header class={`m3-about-hero ${className}`.trim()}>
+	<div class="m3-about-hero__identity">
+		<div class="m3-about-hero__avatar">
+			<Avatar
+				src={avatarSrc}
+				width={avatarWidth}
+				height={avatarHeight}
+				size={160}
+				shape="rounded"
+				loading="eager"
+				fetchPriority="high"
+				alt=""
+				fallback={name.trim().charAt(0)}
+			/>
+		</div>
+		<div class="m3-about-hero__intro">
+			<h1 class="m3-about-hero__name">{name}</h1>
+			<p class="m3-about-hero__handle">@{handle}</p>
+			<p class="m3-about-hero__tagline">{tagline}</p>
+		</div>
+	</div>
+
+	<div class="m3-about-hero__aside">
+		<p class="m3-about-hero__status">
+			<span class="m3-about-hero__status-dot" aria-hidden="true"></span>
+			<span>{statusLabel}</span>
+		</p>
+		<p class="m3-about-hero__updated">{updatedText}</p>
+	</div>
+
+	{
+		links.length > 0 && (
+			<ul class="m3-about-hero__links">
+				{links.map((link) => (
+					<li>
+						<a class="m3-about-hero__link" href={link.href}>
+							<Icon name={link.icon} aria-hidden="true" />
+							<span>{link.label}</span>
+						</a>
+					</li>
+				))}
+			</ul>
+		)
+	}
+</header>
+
+<style lang="stylus">
+.m3-about-hero
+	display: flex
+	flex-direction: column
+	gap: var(--m3e-space-6)
+	padding: var(--m3e-space-6)
+	border: 1px solid var(--outline-variant)
+	border-radius: var(--shape-corner-l)
+	background: var(--card-bg)
+	color: var(--on-surface)
+	@media (min-width: 768px)
+		padding: var(--m3e-space-8)
+	@media (min-width: 1024px)
+		flex-direction: row
+		flex-wrap: wrap
+		align-items: flex-end
+		justify-content: space-between
+		gap: var(--m3e-space-8)
+
+	&__identity
+		display: flex
+		flex-direction: column
+		align-items: center
+		gap: var(--m3e-space-5)
+		text-align: center
+		min-width: 0
+		@media (min-width: 640px)
+			flex-direction: row
+			align-items: center
+			text-align: left
+
+	&__avatar
+		flex-shrink: 0
+		/* 头像外圈：主色环 + 表面留白，和参考稿的圆角方形头像同一语言 */
+		padding: 3px
+		border-radius: var(--shape-corner-l)
+		background: var(--primary)
+
+	&__intro
+		min-width: 0
+
+	&__name
+		margin: 0
+		font: var(--m3e-type-headline-medium)
+		font-weight: 700
+		line-height: 1.15
+		color: var(--on-surface)
+
+	&__handle
+		margin: var(--m3e-space-1) 0 0
+		color: var(--primary)
+		font-family: var(--m3e-font-mono-family, ui-monospace, monospace)
+		font-size: 0.875rem
+		font-weight: 600
+		letter-spacing: 0.02em
+
+	&__tagline
+		margin: var(--m3e-space-2) 0 0
+		max-width: 42ch
+		color: var(--on-surface-variant)
+		font: var(--m3e-type-body-large)
+		line-height: 1.6
+
+	&__aside
+		display: flex
+		flex-direction: column
+		align-items: center
+		gap: var(--m3e-space-1)
+		flex-shrink: 0
+		text-align: center
+		@media (min-width: 1024px)
+			align-items: flex-end
+			text-align: right
+
+	&__status
+		display: inline-flex
+		align-items: center
+		gap: var(--m3e-space-2)
+		margin: 0
+		padding: var(--m3e-space-2) var(--m3e-space-3)
+		border: 1px solid var(--outline-variant)
+		border-radius: var(--shape-corner-full)
+		background: var(--surface-container-low)
+		color: var(--on-surface)
+		font: var(--m3e-type-label-large)
+
+	&__status-dot
+		width: 0.5rem
+		height: 0.5rem
+		border-radius: var(--shape-corner-full)
+		/* 参考稿这里是固定绿点；站内没有 success 语义 token，改用主题主色，
+		   这样明暗模式与自定义 hue 都能跟随，不引入调色板外的硬编码色值 */
+		background: var(--primary)
+		animation: about-status-breathe var(--m3e-duration-ambient-medium) var(--m3e-easing-standard) 2 forwards
+
+	&__updated
+		margin: 0
+		color: var(--on-surface-variant)
+		font: var(--m3e-type-body-small)
+
+	&__links
+		display: flex
+		flex-wrap: wrap
+		justify-content: center
+		gap: var(--m3e-space-2)
+		margin: 0
+		padding: 0
+		list-style: none
+		@media (min-width: 1024px)
+			/* 桌面端链接组独占一行，排在身份区下方 */
+			order: 3
+			flex-basis: 100%
+			justify-content: flex-start
+
+	&__link
+		display: inline-flex
+		align-items: center
+		gap: var(--m3e-space-2)
+		padding: var(--m3e-space-2) var(--m3e-space-4)
+		border: 1px solid var(--outline-variant)
+		border-radius: var(--shape-corner-full)
+		background: var(--btn-regular-bg)
+		color: var(--on-surface)
+		font: var(--m3e-type-label-large)
+		text-decoration: none
+		transition:
+			background-color var(--m3e-duration-short) var(--m3e-easing-standard),
+			border-color var(--m3e-duration-short) var(--m3e-easing-standard),
+			transform var(--m3e-duration-short) var(--m3e-easing-emphasized-decelerate)
+		> :global(svg)
+			width: 1.125rem
+			height: 1.125rem
+			color: var(--primary)
+		&:hover
+			border-color: var(--primary)
+			background: var(--btn-regular-bg-hover)
+			transform: translateY(-1px)
+		&:active
+			transform: translateY(0)
+		&:focus-visible
+			outline: 2px solid var(--primary)
+			outline-offset: 2px
+
+@keyframes about-status-breathe
+	0%
+		opacity: 1
+		transform: scale(1)
+	50%
+		opacity: 0.35
+		transform: scale(0.82)
+	100%
+		opacity: 1
+		transform: scale(1)
+
+@media (prefers-reduced-motion: reduce)
+	.m3-about-hero__status-dot
+		animation: none
+	.m3-about-hero__link
+		transition: none
+</style>

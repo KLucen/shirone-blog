@@ -1,0 +1,80 @@
+---
+/**
+ * 笔记本卡内容（分子）：RSS 收录条目 / 最近发布这类「标签 → 值」行。
+ * 版式对照 github-profile 参考稿的 04 / NOTEBOOK 卡：左列弱化标签、右列加重值，
+ * 行间用 `--outline-variant` 细分隔线，值一律 tabular-nums 对齐。
+ *
+ * 纯 SSR + 纯展示：文案全部来自 aboutData，组件内无写死用户可见文字。
+ */
+import type { AboutNotebookItem } from "@/types/aboutData";
+
+interface Props {
+	items: AboutNotebookItem[];
+	class?: string;
+}
+
+const { items, class: className = "" } = Astro.props;
+---
+
+<ul class={`m3-about-notebook ${className}`.trim()}>
+	{
+		items.map((item) => (
+			<li class="m3-about-notebook__row">
+				<span class="m3-about-notebook__label">{item.label}</span>
+				{item.href ? (
+					<a
+						class="m3-about-notebook__value m3-about-notebook__value--link"
+						href={item.href}
+						target="_blank"
+						rel="noopener"
+					>
+						{item.value}
+					</a>
+				) : (
+					<span class="m3-about-notebook__value">{item.value}</span>
+				)}
+			</li>
+		))
+	}
+</ul>
+
+<style lang="stylus">
+.m3-about-notebook
+	display: flex
+	flex-direction: column
+	margin: 0
+	padding: 0
+	list-style: none
+
+	&__row
+		display: flex
+		align-items: baseline
+		justify-content: space-between
+		gap: var(--m3e-space-4)
+		padding: var(--m3e-space-3) 0
+		border-bottom: 1px solid var(--outline-variant)
+		&:first-child
+			padding-top: 0
+		&:last-child
+			padding-bottom: 0
+			border-bottom: none
+
+	&__label
+		color: var(--on-surface-variant)
+		font: var(--m3e-type-body-medium)
+
+	&__value
+		color: var(--on-surface)
+		font: var(--m3e-type-title-medium)
+		font-variant-numeric: tabular-nums
+		text-align: right
+		overflow-wrap: anywhere
+
+	&__value--link
+		text-decoration: none
+		transition: color var(--m3e-duration-short) ease
+		&:hover
+			color: var(--primary)
+			text-decoration: underline
+			text-underline-offset: 0.2em
+</style>

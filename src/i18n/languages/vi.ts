@@ -358,4 +358,25 @@ export const vi: Translation = {
 		"Thêm URL nguồn cấp ở trên vào trình đọc RSS/Atom yêu thích của bạn (như NetNewsWire, Feedly, Inoreader, Follow) để nhận thông báo bài viết mới.",
 	[Key.feedOpenXml]: "Xem XML gốc",
 	[Key.feedRecentPosts]: "Bài viết mới nhất trong nguồn cấp",
+
+	// About page (GitHub profile style)
+	[Key.aboutSectionOverview]: "GITHUB",
+	[Key.aboutSectionCode]: "CẤU TRÚC MÃ",
+	[Key.aboutSectionActivity]: "HOẠT ĐỘNG",
+	[Key.aboutSectionNotebook]: "SỔ TAY",
+	[Key.aboutSectionPublicData]: "DỮ LIỆU CÔNG KHAI",
+	[Key.aboutLanguagesUnit]: "NGÔN NGỮ",
+	[Key.aboutActivityTotal]: "{count} đóng góp công khai",
+	[Key.aboutActivityActiveDays]: "{count} ngày hoạt động",
+	[Key.aboutActivityLess]: "Ít",
+	[Key.aboutActivityMore]: "Nhiều",
+	[Key.aboutActivityScope]:
+		"Chỉ tính kho lưu trữ công khai không phải fork của chính mình",
+	[Key.aboutAutoUpdate]: "Tự động cập nhật hằng ngày",
+	[Key.aboutUpdatedAt]: "Thu thập gần nhất: {date}",
+	[Key.aboutRecentTitle]: "Mới viết gần đây",
+	[Key.aboutRecentEmpty]: "Chưa có nội dung nào được đăng",
+	[Key.aboutRecentAll]: "Tất cả bài viết",
+	[Key.aboutExploringTitle]: "Đang khám phá",
+	[Key.aboutProvenanceTitle]: "Phạm vi và cập nhật dữ liệu",
 };

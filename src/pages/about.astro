@@ -1,12 +1,21 @@
 ---
+/**
+ * 关于页：GitHub 个人主页风格。
+ * 本文件只做「取数据 + 套外壳 + 渲染」——版式全部在 `@components/organisms/about/AboutShowcase.astro` 里，
+ * 组件不查 collection、不取 i18n（i18n 由 organism 统一取词并替换占位符）。
+ */
 import { getEntry, render } from "astro:content";
 import Card from "@components/atoms/display/Card.svelte";
 import Markdown from "@components/content/Markdown.astro";
+import AboutShowcase from "@components/organisms/about/AboutShowcase.astro";
 import I18nKey from "@i18n/i18nKey";
 import MainGridLayout from "@layouts/MainGridLayout.astro";
+import { getSortedPostsList } from "@utils/content-utils";
+import { formatDateToYYYYMMDD } from "@utils/date-utils";
 import { resolveI18nText } from "@utils/i18n-utils";
 import { getMarkdownStylesheetAssets } from "@utils/markdown-assets";
 import { aboutConfig } from "@/config/aboutConfig";
+import { aboutData } from "@/data/about";
 
 if (!aboutConfig.enable) {
 	return Astro.redirect("/404/");
@@ -25,14 +34,27 @@ const { Content, remarkPluginFrontmatter } = await render(aboutPost);
 const markdownStylesheetAssets = await getMarkdownStylesheetAssets(
 	remarkPluginFrontmatter.markdownSyntaxes,
 );
+
+/** 「最近写下的」取最新几篇；页面查集合，向下只传已定型的展示 props。 */
+const RECENT_POST_COUNT = 3;
+const sortedPosts = await getSortedPostsList();
+const recentPosts = sortedPosts.slice(0, RECENT_POST_COUNT).map((post) => ({
+	title: post.data.title,
+	href: post.url ?? "/archive/",
+	date: formatDateToYYYYMMDD(post.data.published),
+	category: post.data.category ?? "",
+}));
 ---
 <MainGridLayout title={pageTitle} description={pageDescription} page="about">
     {markdownStylesheetAssets.map(({ pack, css }) => <style is:inline slot="head" data-swup-optional={pack} set:html={css}></style>)}
-    <div class="flex w-full rounded-[var(--shape-corner-l)] overflow-hidden relative min-h-32">
-        <Card color="var(--card-bg)" radius="l" class="z-10 p-6 lg:p-8 relative w-full">
-            <Markdown class="mt-2">
-                <Content />
-            </Markdown>
-        </Card>
-    </div>
+    <AboutShowcase aboutData={aboutData} recentPosts={recentPosts}>
+        {/* 第 9 区块：保留现有 spec/about 正文（用户简介） */}
+        <div class="flex w-full rounded-[var(--shape-corner-l)] overflow-hidden relative min-h-32">
+            <Card color="var(--card-bg)" radius="l" class="z-10 p-6 lg:p-8 relative w-full">
+                <Markdown class="mt-2">
+                    <Content />
+                </Markdown>
+            </Card>
+        </div>
+    </AboutShowcase>
 </MainGridLayout>

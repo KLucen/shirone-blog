@@ -1,0 +1,162 @@
+---
+/**
+ * 活跃度卡内容（分子）：53×7 贡献热力图 + 色阶图例 + 口径说明。
+ * 版式对照 github-profile 参考稿的 03 / ACTIVITY 卡。
+ *
+ * 几何完全来自 utils/about-activity.ts（纯函数，可在 node --test 下直接测）：
+ * cells 按「周优先」展开，一列 = 一周 7 天、周日在最上，所以用
+ * `grid-auto-flow: column` + 7 行网格即可，无需手工摆坐标。
+ * 窄屏不做重排，改为横向滚动（与参考稿的 activity-mobile-* 同策略）。
+ * 参考稿还有月份标签，但契约里的 cells 只带等级、不带日期，凭空推算月份会造假数据，
+ * 因此这里不画月份轴。
+ */
+import type { ActivityWeek } from "@utils/about-activity";
+import { ACTIVITY_LEVELS, buildActivityWeeks } from "@utils/about-activity";
+
+interface Props {
+	/** 371 个 0–4 的贡献等级，按周优先展开 */
+	cells: number[];
+	/** 已替换 `{count}` 的贡献总数文案（i18n aboutActivityTotal） */
+	totalText: string;
+	/** 已替换 `{count}` 的活跃天文案（i18n aboutActivityActiveDays） */
+	activeDaysText: string;
+	/** 色阶左端说明（i18n aboutActivityLess） */
+	lessLabel: string;
+	/** 色阶右端说明（i18n aboutActivityMore） */
+	moreLabel: string;
+	/** 统计口径说明（i18n aboutActivityScope） */
+	scopeLabel: string;
+	class?: string;
+}
+
+const {
+	cells,
+	totalText,
+	activeDaysText,
+	lessLabel,
+	moreLabel,
+	scopeLabel,
+	class: className = "",
+} = Astro.props;
+
+const weeks: ActivityWeek[] = buildActivityWeeks(cells);
+/** 热力图整体是一张图：视觉格子对读屏隐藏，无障碍标签用上方两句汇总文案 */
+const summary = `${totalText} · ${activeDaysText}`;
+---
+
+<div class={`m3-about-activity ${className}`.trim()}>
+	<div
+		class="m3-about-activity__scroll"
+		tabindex="0"
+		role="group"
+		aria-label={summary}
+	>
+		<div class="m3-about-activity__grid" aria-hidden="true">
+			{
+				weeks.map((week) =>
+					week.cells.map((cell) => (
+						<span
+							class={`m3-about-activity__cell m3-about-activity__cell--${cell.level}`}
+						/>
+					)),
+				)
+			}
+		</div>
+	</div>
+
+	<div class="m3-about-activity__footer">
+		<p class="m3-about-activity__legend">
+			<span class="m3-about-activity__legend-label">{lessLabel}</span>
+			{
+				ACTIVITY_LEVELS.map((level) => (
+					<span
+						class={`m3-about-activity__cell m3-about-activity__cell--${level} m3-about-activity__legend-swatch`}
+						aria-hidden="true"
+					/>
+				))
+			}
+			<span class="m3-about-activity__legend-label">{moreLabel}</span>
+		</p>
+		<p class="m3-about-activity__days">{activeDaysText}</p>
+	</div>
+
+	<p class="m3-about-activity__scope">{scopeLabel}</p>
+</div>
+
+<style lang="stylus">
+.m3-about-activity
+	--about-cell-size: 11px
+	display: flex
+	flex-direction: column
+	gap: var(--m3e-space-4)
+	@media (min-width: 768px)
+		--about-cell-size: 13px
+
+	&__scroll
+		overflow-x: auto
+		padding-bottom: var(--m3e-space-1)
+		scrollbar-width: thin
+		&:focus-visible
+			outline: 2px solid var(--primary)
+			outline-offset: 2px
+			border-radius: var(--shape-corner-xs)
+
+	&__grid
+		display: grid
+		grid-auto-flow: column
+		grid-template-rows: repeat(7, var(--about-cell-size))
+		grid-auto-columns: var(--about-cell-size)
+		gap: 3px
+		/* 53 列固定几何：max-content 让滚动容器量到真实宽度 */
+		width: max-content
+
+	&__cell
+		display: block
+		width: var(--about-cell-size)
+		height: var(--about-cell-size)
+		border-radius: var(--shape-corner-xs)
+		background: var(--surface-container-highest)
+		/* 色阶：五档全部由主色与 surface 混合，无调色板外硬编码色值 */
+		&--1
+			background: unquote("color-mix(in oklab, var(--primary) 26%, var(--surface-container-high))")
+		&--2
+			background: unquote("color-mix(in oklab, var(--primary) 48%, var(--surface-container-high))")
+		&--3
+			background: unquote("color-mix(in oklab, var(--primary) 72%, var(--surface-container-high))")
+		&--4
+			background: var(--primary)
+
+	&__footer
+		display: flex
+		flex-wrap: wrap
+		align-items: center
+		justify-content: space-between
+		gap: var(--m3e-space-3)
+
+	&__legend
+		display: flex
+		align-items: center
+		gap: var(--m3e-space-2)
+		margin: 0
+
+	&__legend-label
+		color: var(--on-surface-variant)
+		font: var(--m3e-type-body-small)
+
+	&__legend-swatch
+		width: 0.625rem
+		height: 0.625rem
+
+	&__days
+		margin: 0
+		color: var(--on-surface)
+		font: var(--m3e-type-label-large)
+		font-variant-numeric: tabular-nums
+
+	&__scope
+		margin: 0
+		padding-top: var(--m3e-space-3)
+		border-top: 1px solid var(--outline-variant)
+		color: var(--on-surface-variant)
+		font: var(--m3e-type-body-small)
+</style>

@@ -359,4 +359,25 @@ export const tr: Translation = {
 		"Yeni yazı bildirimleri almak için yukarıdaki bağlantıyı dilediğiniz RSS/Atom okuyucusuna (NetNewsWire, Feedly, Inoreader, Follow vb.) ekleyin.",
 	[Key.feedOpenXml]: "Ham XML'i Görüntüle",
 	[Key.feedRecentPosts]: "Akıştaki Son Yazılar",
+
+	// About page (GitHub profile style)
+	[Key.aboutSectionOverview]: "GITHUB",
+	[Key.aboutSectionCode]: "KOD BİLEŞİMİ",
+	[Key.aboutSectionActivity]: "ETKİNLİK",
+	[Key.aboutSectionNotebook]: "NOT DEFTERİ",
+	[Key.aboutSectionPublicData]: "GENEL VERİLER",
+	[Key.aboutLanguagesUnit]: "DİLLER",
+	[Key.aboutActivityTotal]: "{count} herkese açık katkı",
+	[Key.aboutActivityActiveDays]: "{count} aktif gün",
+	[Key.aboutActivityLess]: "Az",
+	[Key.aboutActivityMore]: "Çok",
+	[Key.aboutActivityScope]:
+		"Yalnızca kendine ait fork olmayan herkese açık depolar",
+	[Key.aboutAutoUpdate]: "Her gün otomatik güncellenir",
+	[Key.aboutUpdatedAt]: "Son toplama: {date}",
+	[Key.aboutRecentTitle]: "Son yazılanlar",
+	[Key.aboutRecentEmpty]: "Henüz yayımlanmış içerik yok",
+	[Key.aboutRecentAll]: "Tüm yazılar",
+	[Key.aboutExploringTitle]: "Keşfediliyor",
+	[Key.aboutProvenanceTitle]: "Veri kapsamı ve güncellemeler",
 };

@@ -359,4 +359,25 @@ export const es: Translation = {
 		"Añade esta URL a tu lector RSS/Atom favorito (como NetNewsWire, Feedly, Inoreader o Follow) para recibir actualizaciones.",
 	[Key.feedOpenXml]: "Ver XML original",
 	[Key.feedRecentPosts]: "Artículos recientes del canal",
+
+	// About page (GitHub profile style)
+	[Key.aboutSectionOverview]: "GITHUB",
+	[Key.aboutSectionCode]: "COMPOSICIÓN DEL CÓDIGO",
+	[Key.aboutSectionActivity]: "ACTIVIDAD",
+	[Key.aboutSectionNotebook]: "CUADERNO",
+	[Key.aboutSectionPublicData]: "DATOS PÚBLICOS",
+	[Key.aboutLanguagesUnit]: "LENGUAJES",
+	[Key.aboutActivityTotal]: "{count} contribuciones públicas",
+	[Key.aboutActivityActiveDays]: "{count} días activos",
+	[Key.aboutActivityLess]: "Menos",
+	[Key.aboutActivityMore]: "Más",
+	[Key.aboutActivityScope]:
+		"Solo repositorios públicos propios que no son forks",
+	[Key.aboutAutoUpdate]: "Actualización diaria",
+	[Key.aboutUpdatedAt]: "Última recopilación: {date}",
+	[Key.aboutRecentTitle]: "Escrito recientemente",
+	[Key.aboutRecentEmpty]: "Aún no hay nada publicado",
+	[Key.aboutRecentAll]: "Todas las entradas",
+	[Key.aboutExploringTitle]: "Explorando ahora",
+	[Key.aboutProvenanceTitle]: "Alcance y actualización de los datos",
 };

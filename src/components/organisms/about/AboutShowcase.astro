@@ -1,0 +1,150 @@
+---
+import AboutActivity from "@components/molecules/about/AboutActivity.astro";
+import AboutCard from "@components/molecules/about/AboutCard.astro";
+import AboutExploring from "@components/molecules/about/AboutExploring.astro";
+import AboutHero from "@components/molecules/about/AboutHero.astro";
+import AboutLanguages from "@components/molecules/about/AboutLanguages.astro";
+import AboutNotebook from "@components/molecules/about/AboutNotebook.astro";
+import AboutProvenance from "@components/molecules/about/AboutProvenance.astro";
+import AboutRecent from "@components/molecules/about/AboutRecent.astro";
+import AboutStats from "@components/molecules/about/AboutStats.astro";
+/**
+ * 关于页整页装配（organism）：GitHub 个人主页风格的信息架构。
+ *
+ * 分层约定：
+ * - 页面（`pages/about.astro`）只做数据获取（`aboutData`、最近文章、spec/about 正文）与布局外壳；
+ * - 本组件负责 i18n 取词、`{count}` / `{date}` 占位符替换、时区格式化，再把最终字符串下发给分子；
+ * - 分子只管版式，不查 collection、不取 i18n。
+ *
+ * 区块顺序 = 页面顺序（与 github-profile/README.md 对照）：
+ * Hero → 01 概览 → 02 代码构成 → 03 活跃度 → 04 笔记本 → 最近写下的 →
+ * 「正在探索」→「数据口径与更新」→（slot）用户简介 Markdown 正文。
+ *
+ * 纯 SSR：无 `client:*`，无第三方图表库，折叠区用原生 `<details>`。
+ */
+import I18nKey from "@i18n/i18nKey";
+import { i18n } from "@i18n/translation";
+import { formatInstantDateInSiteTimeZone } from "@utils/content-date";
+import type { AboutData } from "@/types/aboutData";
+
+interface Props {
+	aboutData: AboutData;
+	/** 页面查好的最近文章（已格式化日期），空数组时显示 aboutRecentEmpty */
+	recentPosts: {
+		title: string;
+		href: string;
+		date: string;
+		category?: string;
+	}[];
+	class?: string;
+}
+
+const { aboutData, recentPosts, class: className = "" } = Astro.props;
+
+/** 采集时间按站点时区格式化后再进 `{date}`；不做字符串切片。 */
+const updatedDate = formatInstantDateInSiteTimeZone(
+	new Date(aboutData.generatedAt),
+);
+const updatedText = i18n(I18nKey.aboutUpdatedAt).replace("{date}", updatedDate);
+
+const totalText = i18n(I18nKey.aboutActivityTotal).replace(
+	"{count}",
+	String(aboutData.activity.total),
+);
+const activeDaysText = i18n(I18nKey.aboutActivityActiveDays).replace(
+	"{count}",
+	String(aboutData.activity.days),
+);
+
+const sectionMeta = i18n(I18nKey.aboutSectionPublicData);
+---
+
+<div class={`m3-about-showcase ${className}`.trim()}>
+	<AboutHero
+		name={aboutData.name}
+		handle={aboutData.handle}
+		tagline={aboutData.tagline}
+		links={aboutData.links}
+		statusLabel={i18n(I18nKey.aboutAutoUpdate)}
+		updatedText={updatedText}
+	/>
+
+	<AboutCard
+		index="01"
+		eyebrow={i18n(I18nKey.aboutSectionOverview)}
+		headline={aboutData.statsHeadline}
+		meta={sectionMeta}
+	>
+		<AboutStats stats={aboutData.stats} />
+	</AboutCard>
+
+	<AboutCard
+		index="02"
+		eyebrow={i18n(I18nKey.aboutSectionCode)}
+		meta={sectionMeta}
+	>
+		<AboutLanguages
+			languages={aboutData.languages}
+			languageGroups={aboutData.languageGroups}
+			unitLabel={i18n(I18nKey.aboutLanguagesUnit)}
+		/>
+	</AboutCard>
+
+	<AboutCard
+		index="03"
+		eyebrow={i18n(I18nKey.aboutSectionActivity)}
+		headline={totalText}
+		subtitle={aboutData.activity.scope}
+		meta={sectionMeta}
+	>
+		<AboutActivity
+			cells={aboutData.activity.cells}
+			totalText={totalText}
+			activeDaysText={activeDaysText}
+			lessLabel={i18n(I18nKey.aboutActivityLess)}
+			moreLabel={i18n(I18nKey.aboutActivityMore)}
+			scopeLabel={i18n(I18nKey.aboutActivityScope)}
+		/>
+	</AboutCard>
+
+	<AboutCard
+		index="04"
+		eyebrow={i18n(I18nKey.aboutSectionNotebook)}
+		headline={aboutData.notebookTitle}
+		meta={sectionMeta}
+	>
+		<AboutNotebook items={aboutData.notebook} />
+	</AboutCard>
+
+	<AboutRecent
+		title={i18n(I18nKey.aboutRecentTitle)}
+		posts={recentPosts}
+		emptyLabel={i18n(I18nKey.aboutRecentEmpty)}
+		allLabel={i18n(I18nKey.aboutRecentAll)}
+		allHref="/archive/"
+	/>
+
+	<AboutExploring
+		title={i18n(I18nKey.aboutExploringTitle)}
+		items={aboutData.exploring}
+	/>
+
+	<AboutProvenance
+		title={i18n(I18nKey.aboutProvenanceTitle)}
+		items={aboutData.provenance}
+		updatedLabel={updatedText}
+	/>
+
+	<slot />
+</div>
+
+<style lang="stylus">
+.m3-about-showcase
+	display: flex
+	flex-direction: column
+	gap: var(--m3e-space-8)
+	width: 100%
+	min-width: 0
+	@media (min-width: 768px)
+		gap: var(--m3e-space-10)
+</style>

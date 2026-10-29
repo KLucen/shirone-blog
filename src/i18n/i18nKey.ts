@@ -345,6 +345,26 @@ enum I18nKey {
 	feedHowToUseDesc = "feedHowToUseDesc",
 	feedOpenXml = "feedOpenXml",
 	feedRecentPosts = "feedRecentPosts",
+
+	// About page (GitHub profile style)
+	aboutSectionOverview = "aboutSectionOverview",
+	aboutSectionCode = "aboutSectionCode",
+	aboutSectionActivity = "aboutSectionActivity",
+	aboutSectionNotebook = "aboutSectionNotebook",
+	aboutSectionPublicData = "aboutSectionPublicData",
+	aboutLanguagesUnit = "aboutLanguagesUnit",
+	aboutActivityTotal = "aboutActivityTotal",
+	aboutActivityActiveDays = "aboutActivityActiveDays",
+	aboutActivityLess = "aboutActivityLess",
+	aboutActivityMore = "aboutActivityMore",
+	aboutActivityScope = "aboutActivityScope",
+	aboutAutoUpdate = "aboutAutoUpdate",
+	aboutUpdatedAt = "aboutUpdatedAt",
+	aboutRecentTitle = "aboutRecentTitle",
+	aboutRecentEmpty = "aboutRecentEmpty",
+	aboutRecentAll = "aboutRecentAll",
+	aboutExploringTitle = "aboutExploringTitle",
+	aboutProvenanceTitle = "aboutProvenanceTitle",
 }
 
 export default I18nKey;

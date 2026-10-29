@@ -1,0 +1,138 @@
+---
+/**
+ * 「正在探索」折叠区（分子）：原生 `<details>/<summary>`，无 JS 也能开关。
+ * 版式对照 github-profile 参考稿末尾的 `<details>` 块：
+ * 摘要行 = 主色小三角 + 标题 + 右侧条数，展开后每条 = 标题 / 正文 / 右侧元信息。
+ */
+import type { AboutExploringItem } from "@/types/aboutData";
+
+interface Props {
+	/** 摘要行标题（i18n aboutExploringTitle） */
+	title: string;
+	items: AboutExploringItem[];
+	class?: string;
+}
+
+const { title, items, class: className = "" } = Astro.props;
+---
+
+<details class={`m3-about-exploring ${className}`.trim()}>
+	<summary class="m3-about-exploring__summary">
+		<span class="m3-about-exploring__chevron" aria-hidden="true"></span>
+		<span class="m3-about-exploring__summary-text">{title}</span>
+		<span class="m3-about-exploring__count" aria-hidden="true">{items.length}</span>
+	</summary>
+
+	<ul class="m3-about-exploring__list">
+		{
+			items.map((item) => (
+				<li class="m3-about-exploring__item">
+					<a
+						class="m3-about-exploring__link"
+						href={item.href}
+						target="_blank"
+						rel="noopener"
+					>
+						<span class="m3-about-exploring__item-main">
+							<span class="m3-about-exploring__item-title">{item.title}</span>
+							<span class="m3-about-exploring__item-body">{item.body}</span>
+						</span>
+						<span class="m3-about-exploring__item-meta">{item.meta}</span>
+					</a>
+				</li>
+			))
+		}
+	</ul>
+</details>
+
+<style lang="stylus">
+.m3-about-exploring
+	box-sizing: border-box
+	border: 1px solid var(--outline-variant)
+	border-radius: var(--shape-corner-large)
+	background: var(--card-bg)
+	overflow: hidden
+
+	&__summary
+		display: flex
+		align-items: center
+		gap: var(--m3e-space-3)
+		padding: var(--m3e-space-4) var(--m3e-space-5)
+		color: var(--on-surface)
+		font: var(--m3e-type-title-medium)
+		cursor: pointer
+		list-style: none
+		user-select: none
+		&::-webkit-details-marker
+			display: none
+		&:hover
+			background: var(--btn-regular-bg-hover)
+		&:focus-visible
+			outline: 2px solid var(--primary)
+			outline-offset: -2px
+
+	&__chevron
+		flex: none
+		width: 0.45rem
+		height: 0.45rem
+		border-right: 2px solid var(--primary)
+		border-bottom: 2px solid var(--primary)
+		transform: rotate(-45deg)
+		transition: transform var(--m3e-duration-short) ease
+
+	&[open] &__chevron
+		transform: rotate(45deg)
+
+	&__summary-text
+		flex: 1
+
+	&__count
+		padding: 0 var(--m3e-space-2)
+		border-radius: var(--shape-corner-full)
+		background: var(--btn-regular-bg)
+		color: var(--on-surface-variant)
+		font: var(--m3e-type-label-small)
+		font-variant-numeric: tabular-nums
+
+	&__list
+		display: flex
+		flex-direction: column
+		margin: 0
+		padding: 0 var(--m3e-space-5) var(--m3e-space-3)
+		list-style: none
+
+	&__item
+		border-top: 1px solid var(--outline-variant)
+
+	&__link
+		display: flex
+		align-items: flex-start
+		justify-content: space-between
+		gap: var(--m3e-space-4)
+		padding: var(--m3e-space-4) 0
+		color: var(--on-surface)
+		text-decoration: none
+		&:hover .m3-about-exploring__item-title
+			color: var(--primary)
+
+	&__item-main
+		display: flex
+		flex-direction: column
+		gap: var(--m3e-space-1)
+
+	&__item-title
+		font: var(--m3e-type-title-small)
+		transition: color var(--m3e-duration-short) ease
+
+	&__item-body
+		color: var(--on-surface-variant)
+		font: var(--m3e-type-body-medium)
+
+	&__item-meta
+		flex: none
+		color: var(--on-surface-variant)
+		font: var(--m3e-type-label-medium)
+		white-space: nowrap
+		@media (max-width: 640px)
+			display: none
+</style>
